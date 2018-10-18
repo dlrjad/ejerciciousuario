@@ -11,13 +11,15 @@ import javax.persistence.Id;
 import javax.persistence.JoinTable;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToMany;
+import javax.persistence.Table;
 
 @Entity
+@Table(name="users")
 public class User {
 
   @Id
   @GeneratedValue(strategy = GenerationType.AUTO)
-  private long id;
+  private Long id;
 
   @Column
   private String name;
@@ -34,9 +36,23 @@ public class User {
 
   public User() {}
 
+  public User(Long id, String name, String email) {
+    this.id = id;
+    this.name = name;
+    this.email = email;
+  }
+
   public User(String name, String email) {
     this.name = name;
     this.email = email;
+  }
+
+  public String getName() {
+    return this.name;
+  }
+
+  public String getMail() {
+	  return this.email;
   }
 
 }
