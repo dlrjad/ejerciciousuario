@@ -4,11 +4,13 @@ import java.util.List;
 
 import javax.servlet.http.HttpServletResponse;
 
-import com.plexus.ejerciciousuario.model.ErrorRest;
+import com.plexus.ejerciciousuario.exception.ErrorRest;
+import com.plexus.ejerciciousuario.exception.UserNotFoundException;
 import com.plexus.ejerciciousuario.model.User;
 import com.plexus.ejerciciousuario.repository.UserRepository;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.RequestEntity;
 import org.springframework.http.ResponseEntity;
@@ -19,82 +21,103 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiResponse;
+import io.swagger.annotations.ApiResponses;
+
 @RestController
-@RequestMapping("/api")
+@RequestMapping("/user") //api
+@Api(value="usermanagement", description="Operations to users")
 public class UserController {
 
   @Autowired
+  @Qualifier("userRepository")
   UserRepository userRepository;
 
-  @GetMapping("/usuarios")
-  public List<User> list() {
+  @ApiResponses(value = 
+    {
+      @ApiResponse(code = 200, message = "Successfully retrieved list"),
+      @ApiResponse(code = 401, message = "You are not authorized to view the resource"),
+      @ApiResponse(code = 403, message = "Accessing the resource you were trying to reach is forbidden"),
+      @ApiResponse(code = 404, message = "The resource you were trying to reach is not found")
+    }
+  )
+
+  @ApiOperation(value = "Obtener todos los usuarios")
+  @GetMapping("/users")
+  public ResponseEntity<?> getUsers() {
+    ResponseEntity<?> response;
     List<User> result = userRepository.findAll();
-    if (result != null)
-      return result;
-    else
+    if (result != null) 
+      response = new ResponseEntity<List<User>>(result, HttpStatus.OK);
+    else {
+      response = new ResponseEntity<List<User>>(result, HttpStatus.NOT_FOUND);
       throw new UserNotFoundException();
+    }
+    return response;  
   }
 
-  @GetMapping("/usuario/{id}")
-  public User getUser(@PathVariable Long id) {
+  @ApiOperation(value = "Obtener un usuario por su id")
+  @GetMapping("/user/{id}")
+  public ResponseEntity<?> getUserById(@PathVariable Long id) {
+    ResponseEntity<?> response;
     User result = userRepository.findOne(id);
-    if (result != null)
-      return result;
-    else
+    if (!result.equals(null))
+      response = new ResponseEntity<User>(result, HttpStatus.OK);
+    else {
+      response = new ResponseEntity<User>(result, HttpStatus.NOT_FOUND);
       throw new UserNotFoundException(id);
+    }    
+    return response;
   }
 
-  @PostMapping("/usuario")
-  public User createEmpleado(@RequestBody User user, HttpServletResponse response) {
-    User nuevo = new User(
+  @ApiOperation(value = "Guardar un usuario")
+  @PostMapping("/user")
+  public ResponseEntity<?> createUser(@RequestBody User user, HttpServletResponse response) {
+    ResponseEntity<?> response_;
+    User newUser = new User(
       user.getName(),
       user.getMail()
     );
-    response.setStatus(201);
-    return userRepository.save(nuevo);
+    if(!newUser.equals(null)) {
+      response.setStatus(201);
+      response_ = new ResponseEntity<User>(userRepository.save(newUser), HttpStatus.OK);
+    }else {
+      response_ = new ResponseEntity<User>(userRepository.save(newUser), HttpStatus.BAD_REQUEST);
+    }
+    return response_;
   }
 
+  @ApiOperation(value = "Actualizar un usuario encontrado por su id")
   @PutMapping("/usuario/{id}")
-  public ResponseEntity<?> updateUser(@PathVariable Long id, RequestEntity<User> reqEmpleado) {
-    if (reqEmpleado.getBody() == null) {
+  public ResponseEntity<?> updateUser(@PathVariable Long id, RequestEntity<User> reqUser) {
+    if (reqUser.getBody() == null) {
       return new ResponseEntity<ErrorRest>(new ErrorRest("Formato de petición incorrecto. Debe enviar los datos del usuario a modificar"), HttpStatus.BAD_REQUEST);
     }
-    if (userRepository.findOne(id) != null) {
-      User user = reqEmpleado.getBody();
-      User aActualizar = new User(id, user.getName(), user.getMail());
-    return new ResponseEntity<User>(userRepository.save(aActualizar), HttpStatus.OK);
+    if (!userRepository.findOne(id).equals(null)) {
+      User user = reqUser.getBody();
+      User userUpdate = new User(id, user.getName(), user.getMail());
+      return new ResponseEntity<User>(userRepository.save(userUpdate), HttpStatus.OK);
     } else {
       return new ResponseEntity<ErrorRest>(new ErrorRest("El usuario a modificar no existe"),
         HttpStatus.NOT_FOUND);
     }
   }
 
+  @ApiOperation(value = "Eliminar un usuario encontrado por su id")
   @DeleteMapping("/usuario/{id}")
   public ResponseEntity<?> deleteUser(@PathVariable Long id) {
-    User aBorrar = userRepository.findOne(id);
-      if (aBorrar != null) {
-        userRepository.delete(aBorrar);
-      return new ResponseEntity<User>(aBorrar, HttpStatus.OK);
-      } else {
-         return new ResponseEntity<ErrorRest>(new ErrorRest("El usuario a borrar no existe"), 
-          HttpStatus.NOT_FOUND);
+    User userDelete = userRepository.findOne(id);
+    if (userDelete != null) {
+      userRepository.delete(userDelete);
+      return new ResponseEntity<User>(userDelete, HttpStatus.OK);
+    } else {
+      return new ResponseEntity<ErrorRest>(new ErrorRest("El usuario a borrar no existe"), 
+        HttpStatus.NOT_FOUND);
     }
-  }
-
-  @ResponseStatus(value = HttpStatus.NOT_FOUND)
-  private class UserNotFoundException extends RuntimeException {
-    private static final long serialVersionUID = 7295910574475009536L;
-
-    public UserNotFoundException() {
-      super("No existe ningún usuario");
-    }
-    public UserNotFoundException(Long id) {
-      super(String.format("No existe ningún empleado con el ID = %d", id));
-    }
-
   }
 
 }

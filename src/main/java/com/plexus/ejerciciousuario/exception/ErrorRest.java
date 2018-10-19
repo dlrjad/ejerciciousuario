@@ -1,4 +1,4 @@
-package com.plexus.ejerciciousuario.model;
+package com.plexus.ejerciciousuario.exception;
 
 public class ErrorRest {
 

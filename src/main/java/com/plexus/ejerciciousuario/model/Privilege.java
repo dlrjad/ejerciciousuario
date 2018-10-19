@@ -11,24 +11,38 @@ import javax.persistence.Id;
 import javax.persistence.ManyToMany;
 import javax.persistence.Table;
 
+import io.swagger.annotations.ApiModelProperty;
+
 @Entity
-@Table(name="privilege")
+@Table(name = "privilege")
 public class Privilege {
 
   @Id
   @GeneratedValue(strategy = GenerationType.AUTO)
-  private int id;
+  @Column(name = "privilege_id")
+  @ApiModelProperty(notes = "The database generated user ID")
+  private Long id;
 
-  @Column
+  @Column(name = "name_privilege")
+  @ApiModelProperty(notes = "Nombre del privilegio")
   private String name;
 
-  @ManyToMany(mappedBy="roles")
-  private List<Role> users = new ArrayList<>();
+  @ManyToMany(mappedBy="privileges")
+  private List<Role> roles = new ArrayList<>();
 
   public Privilege() {}
 
+  public Privilege(Long id, String name) {
+    this.id = id;
+    this.name = name;
+  }
+
   public Privilege(String name) {
     this.name = name;
+  }
+
+  public String getName() {
+    return this.name;
   }
 
 }

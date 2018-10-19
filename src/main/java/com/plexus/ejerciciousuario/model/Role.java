@@ -13,31 +13,45 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToMany;
 import javax.persistence.Table;
 
+import io.swagger.annotations.ApiModelProperty;
+
 @Entity
-@Table(name="role")
+@Table(name = "role")
 public class Role {
 
   @Id
   @GeneratedValue(strategy = GenerationType.AUTO)
-  private int id;
+  @Column(name = "role_id")
+  @ApiModelProperty(notes = "The database generated user ID")
+  private Long id;
 
-  @Column
+  @Column(name = "name_role", length = 50)
+  @ApiModelProperty(notes = "Nombre del rol")
   private String name;
 
   @ManyToMany(mappedBy="roles")
   private List<User> users = new ArrayList<>();
 
   @ManyToMany
-  @JoinTable(name="ROLE_PRIVILEGE",
-    joinColumns = @JoinColumn(name="ROLE_ID"),
-    inverseJoinColumns = @JoinColumn(name = "PRIVILEGE_ID")
+  @JoinTable(name="role_privilege",
+    joinColumns = @JoinColumn(name="role_id"),
+    inverseJoinColumns = @JoinColumn(name = "privilege_id")
   )
-  private List<Role> roles = new ArrayList<>();
+  private List<Privilege> privileges = new ArrayList<>();
   
   public Role() {}
 
+  public Role(Long id, String name) {
+    this.id = id;
+    this.name = name;
+  }
+
   public Role(String name) {
     this.name = name;
+  }
+
+  public String getName() {
+    return this.name;
   }
 
 }
