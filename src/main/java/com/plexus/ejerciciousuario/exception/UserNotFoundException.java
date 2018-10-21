@@ -5,7 +5,7 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 
 @ResponseStatus(value = HttpStatus.NOT_FOUND)
 public class UserNotFoundException extends RuntimeException {
-  private static final long serialVersionUID = 7295910574475009536L;
+  private static final long serialVersionUID = -7295910574475009536L;
 
   public UserNotFoundException() {
     super("No existe ningún usuario");

@@ -27,7 +27,7 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 
 @RestController
-@RequestMapping("/role")
+@RequestMapping("/api")
 @Api(value="rolemanagement", description="Operations to roles")
 public class RoleController {
 
@@ -43,8 +43,9 @@ public class RoleController {
     if (!result.equals(null)) 
       response = new ResponseEntity<List<Role>>(result, HttpStatus.OK);
     else {
-      response = new ResponseEntity<List<Role>>(result, HttpStatus.NOT_FOUND);
-      throw new RoleNotFoundException();
+      response = new ResponseEntity<ErrorRest>(new ErrorRest("Roles no encontrados"), 
+        HttpStatus.NOT_FOUND);
+      //throw new RoleNotFoundException();
     }
     return response;
   }
@@ -53,12 +54,13 @@ public class RoleController {
   @GetMapping("/role/{id}")
   public ResponseEntity<?> getRole(@PathVariable Long id) {
     ResponseEntity<?> response;
-    Role result = roleRepository.findOne(id);
+    Role result = roleRepository.findById(id).get();
     if (!result.equals(null))
       response = new ResponseEntity<Role>(result, HttpStatus.OK);
     else {
-      response = new ResponseEntity<Role>(result, HttpStatus.NOT_FOUND);
-      throw new RoleNotFoundException(id);
+      response = new ResponseEntity<ErrorRest>(new ErrorRest("Rol con el ID " +id+ " no encontrado"), 
+        HttpStatus.NOT_FOUND);
+      //throw new RoleNotFoundException(id);
     }
     return response;
   }
@@ -74,7 +76,7 @@ public class RoleController {
       response.setStatus(201);
       response_ = new ResponseEntity<Role>(roleRepository.save(newRole), HttpStatus.OK);
     }else {
-      response_ = new ResponseEntity<Role>(roleRepository.save(newRole), HttpStatus.BAD_REQUEST);
+      response_ = new ResponseEntity<ErrorRest>(new ErrorRest("Datos incorrectos para crear rol"), HttpStatus.BAD_REQUEST);
     }
     return response_;
   }
@@ -85,7 +87,7 @@ public class RoleController {
     if (reqRole.getBody() == null) {
       return new ResponseEntity<ErrorRest>(new ErrorRest("Formato de petición incorrecto. Debe enviar los datos del rol a modificar"), HttpStatus.BAD_REQUEST);
     }
-    if (!roleRepository.findOne(id).equals(null)) {
+    if (!roleRepository.findById(id).equals(null)) {
       Role role = reqRole.getBody();
       Role roleUpdate = new Role(id, role.getName());
       return new ResponseEntity<Role>(roleRepository.save(roleUpdate), HttpStatus.OK);
@@ -98,7 +100,7 @@ public class RoleController {
   @ApiOperation(value = "Eliminar un rol encontrado por su id")
   @DeleteMapping("/role/{id}")
   public ResponseEntity<?> deleteRole(@PathVariable Long id) {
-    Role roleDelete = roleRepository.findOne(id);
+    Role roleDelete = roleRepository.findById(id).get();
     if (roleDelete != null) {
       roleRepository.delete(roleDelete);
       return new ResponseEntity<Role>(roleDelete, HttpStatus.OK);

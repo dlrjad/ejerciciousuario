@@ -27,7 +27,7 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 
 @RestController
-@RequestMapping("/privilege")
+@RequestMapping("/api")
 @Api(value="privilegemanagement", description="Operations to privileges")
 public class PrivilegeController {
 
@@ -44,8 +44,9 @@ public class PrivilegeController {
     if (!result.equals(null)) 
       response = new ResponseEntity<List<Privilege>>(result, HttpStatus.OK);
     else {
-      response = new ResponseEntity<List<Privilege>>(result, HttpStatus.NOT_FOUND);
-      throw new PrivilegeNotFoundException();
+      response = new ResponseEntity<ErrorRest>(new ErrorRest("Privilegios no encontrados"), 
+        HttpStatus.NOT_FOUND);
+      //throw new PrivilegeNotFoundException();
     }
     return response;
   }
@@ -54,12 +55,13 @@ public class PrivilegeController {
   @GetMapping("/privilege/{id}")
   public ResponseEntity<?> getPrivilege(@PathVariable Long id) {
     ResponseEntity<?> response;
-    Privilege result = privilegeRepository.findOne(id);
+    Privilege result = privilegeRepository.findById(id).get();
     if (!result.equals(null))
       response = new ResponseEntity<Privilege>(result, HttpStatus.OK);
     else {
-      response = new ResponseEntity<Privilege>(result, HttpStatus.NOT_FOUND);
-      throw new PrivilegeNotFoundException(id);
+      response = new ResponseEntity<ErrorRest>(new ErrorRest("Privilegio con el ID " +id+ " no encontrado"), 
+        HttpStatus.NOT_FOUND);
+      //throw new PrivilegeNotFoundException(id);
     }
     return response;
   }
@@ -75,7 +77,7 @@ public class PrivilegeController {
       response.setStatus(201);
       response_ = new ResponseEntity<Privilege>(privilegeRepository.save(newPrivilege), HttpStatus.OK);
     }else {
-      response_ = new ResponseEntity<Privilege>(privilegeRepository.save(newPrivilege), HttpStatus.BAD_REQUEST);
+      response_ = new ResponseEntity<ErrorRest>(new ErrorRest("Datos incorrectos para crear privilegio"), HttpStatus.BAD_REQUEST);
     }
     return response_;
   }
@@ -86,7 +88,7 @@ public class PrivilegeController {
     if (reqPrivilege.getBody() == null) {
       return new ResponseEntity<ErrorRest>(new ErrorRest("Formato de petición incorrecto. Debe enviar los datos del privilegio a modificar"), HttpStatus.BAD_REQUEST);
     }
-    if (!privilegeRepository.findOne(id).equals(null)) {
+    if (!privilegeRepository.findById(id).equals(null)) {
       Privilege privilege = reqPrivilege.getBody();
       Privilege privilegeUpdate = new Privilege(id, privilege.getName());
       return new ResponseEntity<Privilege>(privilegeRepository.save(privilegeUpdate), HttpStatus.OK);
@@ -99,7 +101,7 @@ public class PrivilegeController {
   @ApiOperation(value = "Eliminar un privilegio encontrado por su id")
   @DeleteMapping("/privilege/{id}")
   public ResponseEntity<?> deletePrivilege(@PathVariable Long id) {
-    Privilege privilegeDelete = privilegeRepository.findOne(id);
+    Privilege privilegeDelete = privilegeRepository.findById(id).get();
     if (privilegeDelete != null) {
       privilegeRepository.delete(privilegeDelete);
       return new ResponseEntity<Privilege>(privilegeDelete, HttpStatus.OK);
