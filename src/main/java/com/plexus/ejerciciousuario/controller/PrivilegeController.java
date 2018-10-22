@@ -25,47 +25,89 @@ import org.springframework.web.bind.annotation.RestController;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiResponse;
+import io.swagger.annotations.ApiResponses;
+
+/**
+ * Clase controlador privilegio
+ * 
+ * @author dlrjad
+ */
 
 @RestController
 @RequestMapping("/api")
 @Api(value="privilegemanagement", description="Operations to privileges")
 public class PrivilegeController {
 
-  //private static final String PRIVILEGE_REPOSITORY = "privilegeRepository";
   @Autowired
   @Qualifier("privilegeRepository")
   PrivilegeRepository privilegeRepository;
 
+  /**
+   * Método GET obtener todos los privilegios
+   * @return retorna todos los privilegios en caso de éxito
+   */
+  @ApiResponses(value = 
+    {
+      @ApiResponse(code = 200, message = "Éxito al obtener lista de privilegios"),
+      @ApiResponse(code = 401, message = "Sin autorización para ver el recurso"),
+      @ApiResponse(code = 403, message = "Acceso prohibido al recurso"),
+      @ApiResponse(code = 404, message = "Resultado no encontrado")
+    }
+  )
   @ApiOperation(value = "Obtener todos los privilegios")
   @GetMapping("/privileges")
   public ResponseEntity<?> getPrivileges() {
     ResponseEntity<?> response;
-    List<Privilege> result = privilegeRepository.findAll();
-    if (!result.equals(null)) 
+    try {
+      List<Privilege> result = privilegeRepository.findAll();
       response = new ResponseEntity<List<Privilege>>(result, HttpStatus.OK);
-    else {
-      response = new ResponseEntity<ErrorRest>(new ErrorRest("Privilegios no encontrados"), 
-        HttpStatus.NOT_FOUND);
-      //throw new PrivilegeNotFoundException();
+    } catch(Exception e) {
+      throw new PrivilegeNotFoundException();
     }
     return response;
   }
 
+  /**
+   * Método GET obtener un privilegio
+   * @param id
+   * @return retorna un privilegio en caso de éxito
+   */
+  @ApiResponses(value = 
+    {
+      @ApiResponse(code = 200, message = "Éxito al obtener un privilegio"),
+      @ApiResponse(code = 401, message = "Sin autorización para ver el recurso"),
+      @ApiResponse(code = 403, message = "Acceso prohibido al recurso"),
+      @ApiResponse(code = 404, message = "Resultado no encontrado")
+    }
+  )
   @ApiOperation(value = "Obtener un rol por su id")
   @GetMapping("/privilege/{id}")
   public ResponseEntity<?> getPrivilege(@PathVariable Long id) {
     ResponseEntity<?> response;
-    Privilege result = privilegeRepository.findById(id).get();
-    if (!result.equals(null))
+    try {
+      Privilege result = privilegeRepository.findById(id).get();
       response = new ResponseEntity<Privilege>(result, HttpStatus.OK);
-    else {
-      response = new ResponseEntity<ErrorRest>(new ErrorRest("Privilegio con el ID " +id+ " no encontrado"), 
-        HttpStatus.NOT_FOUND);
-      //throw new PrivilegeNotFoundException(id);
+    }catch(Exception e) {
+      throw new PrivilegeNotFoundException(id);
     }
     return response;
   }
 
+  /**
+   * Método POST para crear privilegio
+   * @param privilege
+   * @param response
+   * @return retorna privilegio creado en caso de éxito
+   */
+  @ApiResponses(value = 
+    {
+      @ApiResponse(code = 200, message = "Éxito al crear privilegio"),
+      @ApiResponse(code = 401, message = "Sin autorización para ver el recurso"),
+      @ApiResponse(code = 403, message = "Acceso prohibido al recurso"),
+      @ApiResponse(code = 404, message = "Resultado no encontrado")
+    }
+  )
   @ApiOperation(value = "Guardar un privilegio")
   @PostMapping("/privilege")
   public ResponseEntity<?> createPrivilege(@RequestBody Privilege privilege, HttpServletResponse response) {
@@ -82,6 +124,20 @@ public class PrivilegeController {
     return response_;
   }
 
+  /**
+   * Método PUT para actualizar privilegio
+   * @param id
+   * @param reqPrivilege
+   * @return retorna privilegio actualizado en caso de éxito
+   */
+  @ApiResponses(value = 
+    {
+      @ApiResponse(code = 200, message = "Éxito al actualizar privilegio"),
+      @ApiResponse(code = 401, message = "Sin autorización para ver el recurso"),
+      @ApiResponse(code = 403, message = "Acceso prohibido al recurso"),
+      @ApiResponse(code = 404, message = "Resultado no encontrado")
+    }
+  )
   @ApiOperation(value = "Actualizar un privilegio encontrado por su id")
   @PutMapping("/privilege/{id}")
   public ResponseEntity<?> updatePrivilege(@PathVariable Long id, RequestEntity<Privilege> reqPrivilege) {
@@ -98,6 +154,19 @@ public class PrivilegeController {
     }
   }
 
+  /**
+   * Método DELETE para eliminar privilegio
+   * @param id
+   * @return privilegio eliminado en caso de éxito
+   */
+  @ApiResponses(value = 
+    {
+      @ApiResponse(code = 200, message = "Éxito al borrar privilegio"),
+      @ApiResponse(code = 401, message = "Sin autorización para ver el recurso"),
+      @ApiResponse(code = 403, message = "Acceso prohibido al recurso"),
+      @ApiResponse(code = 404, message = "Resultado no encontrado")
+    }
+  )
   @ApiOperation(value = "Eliminar un privilegio encontrado por su id")
   @DeleteMapping("/privilege/{id}")
   public ResponseEntity<?> deletePrivilege(@PathVariable Long id) {

@@ -28,6 +28,12 @@ import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
 
+/**
+ * Clase controlador usuario
+ * 
+ * @author dlrjad
+ */
+
 @RestController
 @RequestMapping("/api")
 @Api(value="usermanagement", description="Operations to users")
@@ -37,47 +43,74 @@ public class UserController {
   @Qualifier("userRepository")
   UserRepository userRepository;
 
+  /**
+   * Método GET obtener todos los usuarios
+   * @return retorna todos los usuarios en caso de éxito
+   */
   @ApiResponses(value = 
     {
-      @ApiResponse(code = 200, message = "Successfully retrieved list"),
-      @ApiResponse(code = 401, message = "You are not authorized to view the resource"),
-      @ApiResponse(code = 403, message = "Accessing the resource you were trying to reach is forbidden"),
-      @ApiResponse(code = 404, message = "The resource you were trying to reach is not found")
+      @ApiResponse(code = 200, message = "Éxito al obtener lista de usuarios"),
+      @ApiResponse(code = 401, message = "Sin autorización para ver el recurso"),
+      @ApiResponse(code = 403, message = "Acceso prohibido al recurso"),
+      @ApiResponse(code = 404, message = "Resultado no encontrado")
     }
   )
-
   @ApiOperation(value = "Obtener todos los usuarios")
   @GetMapping("/users")
   public ResponseEntity<?> getUsers() {
     ResponseEntity<?> response;
-    List<User> result = userRepository.findAll();
-    if (result != null) 
+    try {
+      List<User> result = userRepository.findAll();
       response = new ResponseEntity<List<User>>(result, HttpStatus.OK);
-    else {
-      response = new ResponseEntity<ErrorRest>(new ErrorRest("Usuarios no encontrados"), 
-        HttpStatus.NOT_FOUND);
-      //throw new UserNotFoundException();
+    } catch(Exception e) {
+      throw new UserNotFoundException();
     }
     return response;
   }
 
+  /**
+   * Método GET obtener un usuario
+   * @param id
+   * @param response
+   * @return retorna un usuario en caso de éxito
+   */
+  @ApiResponses(value = 
+    {
+      @ApiResponse(code = 200, message = "Éxito al obtener un usuario"),
+      @ApiResponse(code = 401, message = "Sin autorización para ver el recurso"),
+      @ApiResponse(code = 403, message = "Acceso prohibido al recurso"),
+      @ApiResponse(code = 404, message = "Resultado no encontrado")
+    }
+  )
   @ApiOperation(value = "Obtener un usuario por su id")
   @GetMapping("/user/{id}")
   public ResponseEntity<?> getUserById(@PathVariable Long id, HttpServletResponse response) {
     ResponseEntity<?> response_=null;
-    User result = userRepository.findById(id).get();
-    if (!result.equals(null)) {
-      response.setStatus(400);
+    try {
+      User result = userRepository.findById(id).get();
+      //response.setStatus(201);
       response_ = new ResponseEntity<User>(result, HttpStatus.OK);
-    }else {
-      response.setStatus(404);
-      /*response_ = new ResponseEntity<ErrorRest>(new ErrorRest("Usuario con el ID " +id+ " no encontrado"), 
-        HttpStatus.NOT_FOUND);*/
+    } catch(Exception e) {
+      //response.setStatus(404);
       throw new UserNotFoundException(id);
     }
     return response_;
   }
 
+  /**
+   * Método POST para crear usuario
+   * @param user
+   * @param response
+   * @return retorna usuario creado en caso de éxito
+   */
+  @ApiResponses(value = 
+    {
+      @ApiResponse(code = 200, message = "Éxito al crear usuario"),
+      @ApiResponse(code = 401, message = "Sin autorización para ver el recurso"),
+      @ApiResponse(code = 403, message = "Acceso prohibido al recurso"),
+      @ApiResponse(code = 404, message = "Resultado no encontrado")
+    }
+  )
   @ApiOperation(value = "Guardar un usuario")
   @PostMapping("/user")
   public ResponseEntity<?> createUser(@RequestBody User user, HttpServletResponse response) {
@@ -90,13 +123,27 @@ public class UserController {
     if(!newUser.equals(null) && user.getName()!="") {
       //response.setStatus(201);
       response_ = new ResponseEntity<User>(userRepository.save(user), HttpStatus.OK);
-    }else {
+    } else {
       //response.setStatus(400);
       response_ = new ResponseEntity<ErrorRest>(new ErrorRest("Datos incorrectos para crear usuario"), HttpStatus.BAD_REQUEST);
     }
     return response_;
   }
 
+  /**
+   * Método PUT para actualizar usuario
+   * @param id
+   * @param reqUser
+   * @return retorna usuario actualizado en caso de éxito
+   */
+  @ApiResponses(value = 
+    {
+      @ApiResponse(code = 200, message = "Éxito al actualizar usuario"),
+      @ApiResponse(code = 401, message = "Sin autorización para ver el recurso"),
+      @ApiResponse(code = 403, message = "Acceso prohibido al recurso"),
+      @ApiResponse(code = 404, message = "Resultado no encontrado")
+    }
+  )
   @ApiOperation(value = "Actualizar un usuario encontrado por su id")
   @PutMapping("/user/{id}")
   public ResponseEntity<?> updateUser(@PathVariable Long id, RequestEntity<User> reqUser) {
@@ -113,6 +160,19 @@ public class UserController {
     }
   }
 
+  /**
+   * Método DELETE para eliminar usuario
+   * @param id
+   * @return usuario eliminado en caso de éxito
+   */
+  @ApiResponses(value = 
+    {
+      @ApiResponse(code = 200, message = "Éxito al borrar usuario"),
+      @ApiResponse(code = 401, message = "Sin autorización para ver el recurso"),
+      @ApiResponse(code = 403, message = "Acceso prohibido al recurso"),
+      @ApiResponse(code = 404, message = "Resultado no encontrado")
+    }
+  )
   @ApiOperation(value = "Eliminar un usuario encontrado por su id")
   @DeleteMapping("/user/{id}")
   public ResponseEntity<?> deleteUser(@PathVariable Long id) {

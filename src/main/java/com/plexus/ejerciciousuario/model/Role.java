@@ -13,14 +13,21 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToMany;
 import javax.persistence.Table;
 
-import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import io.swagger.annotations.ApiModelProperty;
 
+/**
+ * Clase entidad role
+ * 
+ * @author dlrjad
+ */
+
 @Entity
 @Table(name = "role")
-public class Role {
+public class Role implements java.io.Serializable {
+
+  private static final long serialVersionUID = 1L;
 
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -33,7 +40,7 @@ public class Role {
   private String name;
 
   @ManyToMany(mappedBy="roles")
-  //@JsonIgnore
+  @JsonIgnore
   private Set<User> users;
 
   @ManyToMany(cascade = {
@@ -43,20 +50,38 @@ public class Role {
     joinColumns = {@JoinColumn(name="role_id")},
     inverseJoinColumns = {@JoinColumn(name = "privilege_id")}
   )
-  @JsonBackReference
   private Set<Privilege> privileges;
   
+  /**
+   * Constructor por omisión
+   */
   public Role() {}
 
+  /**
+   * Constructor para inicializar atributo id
+   * @param id
+   */
   public Role(Long id){
     this.id = id;
   }
 
+  /**
+   * Constructor para inicializar los atributos id y name 
+   * @param id
+   * @param name
+   */
   public Role(Long id, String name) {
     this.id = id;
     this.name = name;
   }
 
+  /**
+   * Constructor para inicializar los atributos id, name, users y privileges
+   * @param id
+   * @param name
+   * @param users
+   * @param privileges
+   */
   public Role(Long id, String name, Set<User> users, Set<Privilege> privileges) {
     this.id = id;
     this.name = name;
@@ -64,26 +89,50 @@ public class Role {
     this.privileges = privileges;
   }
 
+  /**
+   * Constructor para inicializar atributo nombre
+   * @param name
+   */
   public Role(String name) {
     this.name = name;
   }
 
+  /**
+   * Método obtener nombre
+   * @return String retorna el nombre
+   */
   public String getName() {
     return this.name;
   }
 
+  /**
+   * Método obtener usuarios
+   * @return Set<User> retorna los usuarios
+   */
   public Set<User> getUsers() {
     return users;
   }
 
+  /**
+   * Método pra guardar los usuarios
+   * @param users
+   */
   public void setUser(Set<User> users) {
     this.users = users;
   }
 
+  /**
+   * Método obtener privilegios
+   * @return Set<Privilege> retorna los privilegios
+   */
   public Set<Privilege> getPrivileges() {
     return privileges;
   }
 
+  /**
+   * Método para guardar los privilegios
+   * @param privileges
+   */
   public void setPrivileges(Set<Privilege> privileges) {
     this.privileges = privileges;
   }

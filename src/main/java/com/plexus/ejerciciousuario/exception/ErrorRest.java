@@ -1,7 +1,9 @@
 package com.plexus.ejerciciousuario.exception;
 
-public class ErrorRest {
+public class ErrorRest extends RuntimeException {
 
+  private static final long serialVersionUID = 1L;
+  
   private String mensaje;
 
   public ErrorRest() {}

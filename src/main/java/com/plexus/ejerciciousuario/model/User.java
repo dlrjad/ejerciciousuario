@@ -13,19 +13,19 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToMany;
 import javax.persistence.Table;
 
-import com.fasterxml.jackson.annotation.JsonBackReference;
-
 import io.swagger.annotations.ApiModelProperty;
 
 /**
- * Clase entidad usuario
+ * Clase entidad user
  * 
  * @author dlrjad
  */
 
 @Entity
 @Table(name = "users")
-public class User {
+public class User implements java.io.Serializable {
+
+  private static final long serialVersionUID = 1L;
 
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -48,21 +48,40 @@ public class User {
     joinColumns = {@JoinColumn(name="user_id")},
     inverseJoinColumns = {@JoinColumn(name = "role_id")}
   )
-  @JsonBackReference
   private Set<Role> roles;
 
+  /**
+   * Costructor por omisión
+   */
   public User() {}
 
+  /**
+   * Constructor para inicializar atributo id
+   * @param id
+   */
   public User(Long id){
     this.id = id;
   }
 
+  /**
+   * Constructor para inicializar los atributos name, mail y roles
+   * @param name
+   * @param email
+   * @param roles
+   */
   public User(String name, String email, Set<Role> roles) {
     this.name = name;
     this.mail = email;
     this.roles = roles;
   }
 
+  /**
+   * Constructor para inicializar los atributos id, name, email y roles
+   * @param id
+   * @param name
+   * @param email
+   * @param roles
+   */
   public User(Long id, String name, String email, Set<Role> roles) {
     this.id = id;
     this.name = name;
@@ -96,10 +115,18 @@ public class User {
 	  return this.mail;
   }
 
+  /**
+   * Método obtener roles
+   * @return Set<Role> retorna los roles
+   */
   public Set<Role> getRoles() {
     return roles;
   }
 
+  /**
+   * Método para guardar los roles
+   * @param roles
+   */
   public void setRoles(Set<Role> roles) {
     this.roles = roles;
   }

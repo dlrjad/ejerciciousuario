@@ -25,6 +25,14 @@ import org.springframework.web.bind.annotation.RestController;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiResponse;
+import io.swagger.annotations.ApiResponses;
+
+/**
+ * Clase controlador rol
+ * 
+ * @author dlrjad
+ */
 
 @RestController
 @RequestMapping("/api")
@@ -35,36 +43,71 @@ public class RoleController {
   @Qualifier("roleRepository")
   RoleRepository roleRepository;
 
+  /**
+   * Método GET obtener todos los roles
+   * @return retorna todos los roles en caso de éxito
+   */
+  @ApiResponses(value = 
+    {
+      @ApiResponse(code = 200, message = "Éxito al obtener lista de roles"),
+      @ApiResponse(code = 401, message = "Sin autorización para ver el recurso"),
+      @ApiResponse(code = 403, message = "Acceso prohibido al recurso"),
+      @ApiResponse(code = 404, message = "Resultado no encontrado")
+    }
+  )
   @ApiOperation(value = "Obtener todos los roles")
   @GetMapping("/roles")
   public ResponseEntity<?> getRoles() {
     ResponseEntity<?> response;
-    List<Role> result = roleRepository.findAll();
-    if (!result.equals(null)) 
+    try {
+      List<Role> result = roleRepository.findAll();
       response = new ResponseEntity<List<Role>>(result, HttpStatus.OK);
-    else {
-      response = new ResponseEntity<ErrorRest>(new ErrorRest("Roles no encontrados"), 
-        HttpStatus.NOT_FOUND);
-      //throw new RoleNotFoundException();
+    } catch(Exception e) {
+      throw new RoleNotFoundException();
     }
     return response;
   }
 
+  /**
+   * Método GET obtener un rol
+   * @param id
+   * @return retorna un rol en caso de éxito
+   */
+  @ApiResponses(value = 
+    {
+      @ApiResponse(code = 200, message = "Éxito al obtener un rol"),
+      @ApiResponse(code = 401, message = "Sin autorización para ver el recurso"),
+      @ApiResponse(code = 403, message = "Acceso prohibido al recurso"),
+      @ApiResponse(code = 404, message = "Resultado no encontrado")
+    }
+  )
   @ApiOperation(value = "Obtener un rol por su id")
   @GetMapping("/role/{id}")
   public ResponseEntity<?> getRole(@PathVariable Long id) {
     ResponseEntity<?> response;
-    Role result = roleRepository.findById(id).get();
-    if (!result.equals(null))
+    try {
+      Role result = roleRepository.findById(id).get();
       response = new ResponseEntity<Role>(result, HttpStatus.OK);
-    else {
-      response = new ResponseEntity<ErrorRest>(new ErrorRest("Rol con el ID " +id+ " no encontrado"), 
-        HttpStatus.NOT_FOUND);
-      //throw new RoleNotFoundException(id);
+    } catch(Exception e) {
+      throw new RoleNotFoundException(id);
     }
     return response;
   }
 
+  /**
+   * Método POST para crear rol
+   * @param role
+   * @param response
+   * @return retorna rol creado en caso de éxito
+   */
+  @ApiResponses(value = 
+    {
+      @ApiResponse(code = 200, message = "Éxito al crear un rol"),
+      @ApiResponse(code = 401, message = "Sin autorización para ver el recurso"),
+      @ApiResponse(code = 403, message = "Acceso prohibido al recurso"),
+      @ApiResponse(code = 404, message = "Resultado no encontrado")
+    }
+  )
   @ApiOperation(value = "Guardar un rol")
   @PostMapping("/role")
   public ResponseEntity<?> createRole(@RequestBody Role role, HttpServletResponse response) {
@@ -81,6 +124,20 @@ public class RoleController {
     return response_;
   }
 
+  /**
+   * Método PUT para actualizar rol
+   * @param id
+   * @param reqRole
+   * @return retorna rol actualizado en caso de éxito
+   */
+  @ApiResponses(value = 
+    {
+      @ApiResponse(code = 200, message = "Éxito al actualizar rol"),
+      @ApiResponse(code = 401, message = "Sin autorización para ver el recurso"),
+      @ApiResponse(code = 403, message = "Acceso prohibido al recurso"),
+      @ApiResponse(code = 404, message = "Resultado no encontrado")
+    }
+  )
   @ApiOperation(value = "Actualizar un rol encontrado por su id")
   @PutMapping("/role/{id}")
   public ResponseEntity<?> updateRole(@PathVariable Long id, RequestEntity<Role> reqRole) {
@@ -97,6 +154,19 @@ public class RoleController {
     }
   }
 
+  /**
+   * Método DELETE para eliminar rol
+   * @param id
+   * @return rol eliminado en caso de éxito
+   */
+  @ApiResponses(value = 
+    {
+      @ApiResponse(code = 200, message = "Éxito al borrar rol"),
+      @ApiResponse(code = 401, message = "Sin autorización para ver el recurso"),
+      @ApiResponse(code = 403, message = "Acceso prohibido al recurso"),
+      @ApiResponse(code = 404, message = "Resultado no encontrado")
+    }
+  )
   @ApiOperation(value = "Eliminar un rol encontrado por su id")
   @DeleteMapping("/role/{id}")
   public ResponseEntity<?> deleteRole(@PathVariable Long id) {
