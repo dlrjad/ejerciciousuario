@@ -89,7 +89,7 @@ public class RoleController {
     }
     if (!roleRepository.findById(id).equals(null)) {
       Role role = reqRole.getBody();
-      Role roleUpdate = new Role(id, role.getName());
+      Role roleUpdate = new Role(id, role.getName(), role.getUsers(), role.getPrivileges());
       return new ResponseEntity<Role>(roleRepository.save(roleUpdate), HttpStatus.OK);
     } else {
       return new ResponseEntity<ErrorRest>(new ErrorRest("El rol a modificar no existe"),

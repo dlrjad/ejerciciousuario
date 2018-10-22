@@ -1,8 +1,8 @@
 package com.plexus.ejerciciousuario.model;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.Set;
 
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
@@ -13,6 +13,9 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToMany;
 import javax.persistence.Table;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import io.swagger.annotations.ApiModelProperty;
 
 @Entity
@@ -20,8 +23,8 @@ import io.swagger.annotations.ApiModelProperty;
 public class Role {
 
   @Id
-  @GeneratedValue(strategy = GenerationType.AUTO)
-  @Column(name = "role_id")
+  @GeneratedValue(strategy = GenerationType.IDENTITY)
+  @Column(name = "role_id", unique=true)
   @ApiModelProperty(notes = "The database generated user ID")
   private Long id;
 
@@ -30,20 +33,35 @@ public class Role {
   private String name;
 
   @ManyToMany(mappedBy="roles")
-  private List<User> users = new ArrayList<>();
+  //@JsonIgnore
+  private Set<User> users;
 
-  @ManyToMany
+  @ManyToMany(cascade = {
+    CascadeType.ALL
+  })
   @JoinTable(name="role_privilege",
-    joinColumns = @JoinColumn(name="role_id"),
-    inverseJoinColumns = @JoinColumn(name = "privilege_id")
+    joinColumns = {@JoinColumn(name="role_id")},
+    inverseJoinColumns = {@JoinColumn(name = "privilege_id")}
   )
-  private List<Privilege> privileges = new ArrayList<>();
+  @JsonBackReference
+  private Set<Privilege> privileges;
   
   public Role() {}
+
+  public Role(Long id){
+    this.id = id;
+  }
 
   public Role(Long id, String name) {
     this.id = id;
     this.name = name;
+  }
+
+  public Role(Long id, String name, Set<User> users, Set<Privilege> privileges) {
+    this.id = id;
+    this.name = name;
+    this.users = users;
+    this.privileges = privileges;
   }
 
   public Role(String name) {
@@ -52,6 +70,22 @@ public class Role {
 
   public String getName() {
     return this.name;
+  }
+
+  public Set<User> getUsers() {
+    return users;
+  }
+
+  public void setUser(Set<User> users) {
+    this.users = users;
+  }
+
+  public Set<Privilege> getPrivileges() {
+    return privileges;
+  }
+
+  public void setPrivileges(Set<Privilege> privileges) {
+    this.privileges = privileges;
   }
 
 }

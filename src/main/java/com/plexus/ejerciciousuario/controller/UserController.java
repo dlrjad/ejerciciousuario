@@ -84,11 +84,12 @@ public class UserController {
     ResponseEntity<?> response_;
     User newUser = new User(
       user.getName(),
-      user.getMail()
+      user.getMail(),
+      user.getRoles()
     );
     if(!newUser.equals(null) && user.getName()!="") {
       //response.setStatus(201);
-      response_ = new ResponseEntity<User>(userRepository.save(newUser), HttpStatus.OK);
+      response_ = new ResponseEntity<User>(userRepository.save(user), HttpStatus.OK);
     }else {
       //response.setStatus(400);
       response_ = new ResponseEntity<ErrorRest>(new ErrorRest("Datos incorrectos para crear usuario"), HttpStatus.BAD_REQUEST);
@@ -102,9 +103,9 @@ public class UserController {
     if (reqUser.getBody() == null) {
       return new ResponseEntity<ErrorRest>(new ErrorRest("Formato de petición incorrecto. Debe enviar los datos del usuario a modificar"), HttpStatus.BAD_REQUEST);
     }
-    if (!userRepository.findById(id).equals(null)) {
+    if (userRepository.findById(id) != null) {
       User user = reqUser.getBody();
-      User userUpdate = new User(id, user.getName(), user.getMail());
+      User userUpdate = new User(id, user.getName(), user.getMail(), user.getRoles());
       return new ResponseEntity<User>(userRepository.save(userUpdate), HttpStatus.OK);
     } else {
       return new ResponseEntity<ErrorRest>(new ErrorRest("El usuario a modificar no existe"),

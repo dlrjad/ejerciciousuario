@@ -74,7 +74,7 @@ public class PrivilegeController {
       privilege.getName()
     );
     if(!newPrivilege.equals(null)) {
-      response.setStatus(201);
+      //response.setStatus(201);
       response_ = new ResponseEntity<Privilege>(privilegeRepository.save(newPrivilege), HttpStatus.OK);
     }else {
       response_ = new ResponseEntity<ErrorRest>(new ErrorRest("Datos incorrectos para crear privilegio"), HttpStatus.BAD_REQUEST);
@@ -90,7 +90,7 @@ public class PrivilegeController {
     }
     if (!privilegeRepository.findById(id).equals(null)) {
       Privilege privilege = reqPrivilege.getBody();
-      Privilege privilegeUpdate = new Privilege(id, privilege.getName());
+      Privilege privilegeUpdate = new Privilege(id, privilege.getName(), privilege.getRoles());
       return new ResponseEntity<Privilege>(privilegeRepository.save(privilegeUpdate), HttpStatus.OK);
     } else {
       return new ResponseEntity<ErrorRest>(new ErrorRest("El privilegio a modificar no existe"),

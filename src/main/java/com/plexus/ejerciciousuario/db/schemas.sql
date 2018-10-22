@@ -3,19 +3,19 @@ create database ejerciciousuario;
 use ejerciciousuario;
 
 CREATE TABLE users(
-	user_id int PRIMARY KEY,
+	user_id int PRIMARY KEY AUTO_INCREMENT,
 	name_user varchar(50),
 	email varchar(50)
 ) ENGINE=INNODB;
 
 CREATE TABLE role(
-  role_id int PRIMARY KEY,
+  role_id int PRIMARY KEY AUTO_INCREMENT,
 	name_role varchar(50)
 ) ENGINE=INNODB;
 
 CREATE TABLE privilege(
-	privilege_id int PRIMARY KEY,
-	name_privigele varchar(50)
+	privilege_id int PRIMARY KEY AUTO_INCREMENT,
+	name_privilege varchar(50)
 ) ENGINE=INNODB;
 
 CREATE TABLE user_role(
