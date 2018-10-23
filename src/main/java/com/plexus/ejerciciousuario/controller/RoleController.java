@@ -24,6 +24,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiImplicitParam;
+import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
@@ -55,17 +57,15 @@ public class RoleController {
       @ApiResponse(code = 404, message = "Resultado no encontrado")
     }
   )
-  @ApiOperation(value = "Obtener todos los roles")
+  @ApiOperation(value = "Obtener todos los roles", response = Role.class, responseContainer = "List")
   @GetMapping("/roles")
   public ResponseEntity<?> getRoles() {
-    ResponseEntity<?> response;
     try {
       List<Role> result = roleRepository.findAll();
-      response = new ResponseEntity<List<Role>>(result, HttpStatus.OK);
+      return new ResponseEntity<List<Role>>(result, HttpStatus.OK);
     } catch(Exception e) {
       throw new RoleNotFoundException();
     }
-    return response;
   }
 
   /**
@@ -81,17 +81,19 @@ public class RoleController {
       @ApiResponse(code = 404, message = "Resultado no encontrado")
     }
   )
-  @ApiOperation(value = "Obtener un rol por su id")
+  @ApiImplicitParams({
+    @ApiImplicitParam(name = "id", value = "Role ID", required = true, dataType = "long", paramType = "query"),
+    @ApiImplicitParam(name = "response", value = "Http Response", required = true)
+  })
+  @ApiOperation(value = "Obtener un rol por su id", response = Role.class)
   @GetMapping("/role/{id}")
   public ResponseEntity<?> getRole(@PathVariable Long id) {
-    ResponseEntity<?> response;
     try {
       Role result = roleRepository.findById(id).get();
-      response = new ResponseEntity<Role>(result, HttpStatus.OK);
+      return new ResponseEntity<Role>(result, HttpStatus.OK);
     } catch(Exception e) {
       throw new RoleNotFoundException(id);
     }
-    return response;
   }
 
   /**
@@ -108,20 +110,22 @@ public class RoleController {
       @ApiResponse(code = 404, message = "Resultado no encontrado")
     }
   )
-  @ApiOperation(value = "Guardar un rol")
+  @ApiImplicitParams({
+    @ApiImplicitParam(name = "role", value = "Role object", required = true, dataType = "object", paramType = "query"),
+    @ApiImplicitParam(name = "response", value = "Http Response", required = true)
+  })
+  @ApiOperation(value = "Guardar un rol", response = Role.class)
   @PostMapping("/role")
   public ResponseEntity<?> createRole(@RequestBody Role role, HttpServletResponse response) {
-    ResponseEntity<?> response_;
     Role newRole = new Role(
       role.getName()
     );
     if(!newRole.equals(null)) {
-      response.setStatus(201);
-      response_ = new ResponseEntity<Role>(roleRepository.save(newRole), HttpStatus.OK);
+      //response.setStatus(201);
+      return new ResponseEntity<Role>(roleRepository.save(newRole), HttpStatus.OK);
     }else {
-      response_ = new ResponseEntity<ErrorRest>(new ErrorRest("Datos incorrectos para crear rol"), HttpStatus.BAD_REQUEST);
+      return new ResponseEntity<ErrorRest>(new ErrorRest("Datos incorrectos para crear rol"), HttpStatus.BAD_REQUEST);
     }
-    return response_;
   }
 
   /**
@@ -138,19 +142,26 @@ public class RoleController {
       @ApiResponse(code = 404, message = "Resultado no encontrado")
     }
   )
-  @ApiOperation(value = "Actualizar un rol encontrado por su id")
+  @ApiImplicitParams({
+    @ApiImplicitParam(name = "id", value = "Role ID", required = true, dataType = "long", paramType = "query"),
+    @ApiImplicitParam(name = "reqRole", value = "RequestEntity", required = true)
+  })
+  @ApiOperation(value = "Actualizar un rol encontrado por su id", response = Role.class)
   @PutMapping("/role/{id}")
   public ResponseEntity<?> updateRole(@PathVariable Long id, RequestEntity<Role> reqRole) {
     if (reqRole.getBody() == null) {
       return new ResponseEntity<ErrorRest>(new ErrorRest("Formato de petición incorrecto. Debe enviar los datos del rol a modificar"), HttpStatus.BAD_REQUEST);
-    }
-    if (!roleRepository.findById(id).equals(null)) {
-      Role role = reqRole.getBody();
-      Role roleUpdate = new Role(id, role.getName(), role.getUsers(), role.getPrivileges());
-      return new ResponseEntity<Role>(roleRepository.save(roleUpdate), HttpStatus.OK);
-    } else {
-      return new ResponseEntity<ErrorRest>(new ErrorRest("El rol a modificar no existe"),
-        HttpStatus.NOT_FOUND);
+    } 
+    try {
+      if (!roleRepository.findById(id).equals(null) && roleRepository.existsById(id)) {
+        Role role = reqRole.getBody();
+        Role roleUpdate = new Role(id, role.getName(), role.getUsers(), role.getPrivileges());
+        return new ResponseEntity<Role>(roleRepository.save(roleUpdate), HttpStatus.OK);
+      } else {
+        throw new RoleNotFoundException(id);
+      } 
+    } catch(Exception e) {
+      throw e;
     }
   }
 
@@ -167,16 +178,18 @@ public class RoleController {
       @ApiResponse(code = 404, message = "Resultado no encontrado")
     }
   )
-  @ApiOperation(value = "Eliminar un rol encontrado por su id")
+  @ApiImplicitParams({
+    @ApiImplicitParam(name = "id", value = "Role ID", required = true, dataType = "long", paramType = "query")
+  })
+  @ApiOperation(value = "Eliminar un rol encontrado por su id", response = Role.class)
   @DeleteMapping("/role/{id}")
   public ResponseEntity<?> deleteRole(@PathVariable Long id) {
-    Role roleDelete = roleRepository.findById(id).get();
-    if (roleDelete != null) {
+    try {
+      Role roleDelete = roleRepository.findById(id).get();
       roleRepository.delete(roleDelete);
       return new ResponseEntity<Role>(roleDelete, HttpStatus.OK);
-    } else {
-      return new ResponseEntity<ErrorRest>(new ErrorRest("El rol a borrar no existe"), 
-        HttpStatus.NOT_FOUND);
+    } catch(Exception e) {
+      throw new RoleNotFoundException(id);
     }
   }
 

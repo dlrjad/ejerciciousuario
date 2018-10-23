@@ -24,6 +24,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiImplicitParam;
+import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
@@ -55,17 +57,15 @@ public class UserController {
       @ApiResponse(code = 404, message = "Resultado no encontrado")
     }
   )
-  @ApiOperation(value = "Obtener todos los usuarios")
+  @ApiOperation(value = "Obtener todos los usuarios", response = User.class, responseContainer = "List")
   @GetMapping("/users")
   public ResponseEntity<?> getUsers() {
-    ResponseEntity<?> response;
     try {
       List<User> result = userRepository.findAll();
-      response = new ResponseEntity<List<User>>(result, HttpStatus.OK);
+      return new ResponseEntity<List<User>>(result, HttpStatus.OK);
     } catch(Exception e) {
       throw new UserNotFoundException();
     }
-    return response;
   }
 
   /**
@@ -82,19 +82,21 @@ public class UserController {
       @ApiResponse(code = 404, message = "Resultado no encontrado")
     }
   )
-  @ApiOperation(value = "Obtener un usuario por su id")
+  @ApiImplicitParams({
+    @ApiImplicitParam(name = "id", value = "User ID", required = true, dataType = "long", paramType = "query"),
+    @ApiImplicitParam(name = "response", value = "Http Response", required = true)
+  })
+  @ApiOperation(value = "Obtener un usuario por su id", response = User.class)
   @GetMapping("/user/{id}")
   public ResponseEntity<?> getUserById(@PathVariable Long id, HttpServletResponse response) {
-    ResponseEntity<?> response_=null;
     try {
       User result = userRepository.findById(id).get();
       //response.setStatus(201);
-      response_ = new ResponseEntity<User>(result, HttpStatus.OK);
+      return new ResponseEntity<User>(result, HttpStatus.OK);
     } catch(Exception e) {
       //response.setStatus(404);
       throw new UserNotFoundException(id);
     }
-    return response_;
   }
 
   /**
@@ -111,23 +113,24 @@ public class UserController {
       @ApiResponse(code = 404, message = "Resultado no encontrado")
     }
   )
-  @ApiOperation(value = "Guardar un usuario")
+  @ApiImplicitParams({
+    @ApiImplicitParam(name = "user", value = "User object", required = true, dataType = "object", paramType = "query"),
+    @ApiImplicitParam(name = "response", value = "Http Response", required = true)
+  })
+  @ApiOperation(value = "Guardar un usuario", response = User.class)
   @PostMapping("/user")
   public ResponseEntity<?> createUser(@RequestBody User user, HttpServletResponse response) {
-    ResponseEntity<?> response_;
     User newUser = new User(
       user.getName(),
-      user.getMail(),
-      user.getRoles()
+      user.getMail()
     );
-    if(!newUser.equals(null) && user.getName()!="") {
+    if(!newUser.equals(null)) {
       //response.setStatus(201);
-      response_ = new ResponseEntity<User>(userRepository.save(user), HttpStatus.OK);
+      return new ResponseEntity<User>(userRepository.save(user), HttpStatus.OK);
     } else {
       //response.setStatus(400);
-      response_ = new ResponseEntity<ErrorRest>(new ErrorRest("Datos incorrectos para crear usuario"), HttpStatus.BAD_REQUEST);
+      return new ResponseEntity<ErrorRest>(new ErrorRest("Datos incorrectos para crear usuario"), HttpStatus.BAD_REQUEST);
     }
-    return response_;
   }
 
   /**
@@ -144,19 +147,26 @@ public class UserController {
       @ApiResponse(code = 404, message = "Resultado no encontrado")
     }
   )
-  @ApiOperation(value = "Actualizar un usuario encontrado por su id")
+  @ApiImplicitParams({
+    @ApiImplicitParam(name = "id", value = "User ID", required = true, dataType = "long", paramType = "query"),
+    @ApiImplicitParam(name = "reqUser", value = "RequestEntity", required = true)
+  })
+  @ApiOperation(value = "Actualizar un usuario encontrado por su id", response = User.class)
   @PutMapping("/user/{id}")
   public ResponseEntity<?> updateUser(@PathVariable Long id, RequestEntity<User> reqUser) {
     if (reqUser.getBody() == null) {
       return new ResponseEntity<ErrorRest>(new ErrorRest("Formato de petición incorrecto. Debe enviar los datos del usuario a modificar"), HttpStatus.BAD_REQUEST);
-    }
-    if (userRepository.findById(id) != null) {
-      User user = reqUser.getBody();
-      User userUpdate = new User(id, user.getName(), user.getMail(), user.getRoles());
-      return new ResponseEntity<User>(userRepository.save(userUpdate), HttpStatus.OK);
-    } else {
-      return new ResponseEntity<ErrorRest>(new ErrorRest("El usuario a modificar no existe"),
-        HttpStatus.NOT_FOUND);
+    } 
+    try {
+      if (!userRepository.findById(id).equals(null) && userRepository.existsById(id)) {
+        User user = reqUser.getBody();
+        User userUpdate = new User(id, user.getName(), user.getMail(), user.getRoles());
+        return new ResponseEntity<User>(userRepository.save(userUpdate), HttpStatus.OK);
+      } else {
+        throw new UserNotFoundException(id);
+      }
+    } catch(Exception e) {
+      throw e;
     }
   }
 
@@ -173,16 +183,18 @@ public class UserController {
       @ApiResponse(code = 404, message = "Resultado no encontrado")
     }
   )
-  @ApiOperation(value = "Eliminar un usuario encontrado por su id")
+  @ApiImplicitParams({
+    @ApiImplicitParam(name = "id", value = "User ID", required = true, dataType = "long", paramType = "query")
+  })
+  @ApiOperation(value = "Eliminar un usuario encontrado por su id", response = User.class)
   @DeleteMapping("/user/{id}")
   public ResponseEntity<?> deleteUser(@PathVariable Long id) {
-    User userDelete = userRepository.findById(id).get();
-    if (userDelete != null) {
+    try {
+      User userDelete = userRepository.findById(id).get();
       userRepository.delete(userDelete);
       return new ResponseEntity<User>(userDelete, HttpStatus.OK);
-    } else {
-      return new ResponseEntity<ErrorRest>(new ErrorRest("El usuario a borrar no existe"), 
-        HttpStatus.NOT_FOUND);
+    } catch(Exception e) {
+      throw new UserNotFoundException(id);
     }
   }
 

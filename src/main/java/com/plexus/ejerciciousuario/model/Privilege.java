@@ -12,6 +12,7 @@ import javax.persistence.Table;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
+import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 
 /**
@@ -22,6 +23,7 @@ import io.swagger.annotations.ApiModelProperty;
 
 @Entity
 @Table(name = "privilege")
+@ApiModel(value="Identificador", description="Clase entidad privilege")
 public class Privilege implements java.io.Serializable {
 
   private static final long serialVersionUID = 1L;
@@ -30,7 +32,7 @@ public class Privilege implements java.io.Serializable {
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   @Column(name = "privilege_id", unique=true)
   @ApiModelProperty(notes = "The database generated user ID")
-  private Long id;
+  private Long privilege_id;
 
   @Column(name = "name_privilege", length = 50)
   @ApiModelProperty(notes = "Nombre del privilegio")
@@ -50,7 +52,7 @@ public class Privilege implements java.io.Serializable {
    * @param id
    */
   public Privilege(Long id){
-    this.id = id;
+    this.privilege_id = id;
   }
 
   /**
@@ -59,7 +61,7 @@ public class Privilege implements java.io.Serializable {
    * @param name
    */
   public Privilege(Long id, String name) {
-    this.id = id;
+    this.privilege_id = id;
     this.name = name;
   }
 
@@ -70,7 +72,7 @@ public class Privilege implements java.io.Serializable {
    * @param roles
    */
   public Privilege(Long id, String name, Set<Role> roles) {
-    this.id = id;
+    this.privilege_id = id;
     this.name = name;
     this.roles = roles;
   }

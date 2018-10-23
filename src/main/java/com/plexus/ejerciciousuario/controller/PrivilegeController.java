@@ -24,6 +24,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiImplicitParam;
+import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
@@ -55,17 +57,15 @@ public class PrivilegeController {
       @ApiResponse(code = 404, message = "Resultado no encontrado")
     }
   )
-  @ApiOperation(value = "Obtener todos los privilegios")
+  @ApiOperation(value = "Obtener todos los privilegios", response = Privilege.class, responseContainer = "List")
   @GetMapping("/privileges")
   public ResponseEntity<?> getPrivileges() {
-    ResponseEntity<?> response;
     try {
       List<Privilege> result = privilegeRepository.findAll();
-      response = new ResponseEntity<List<Privilege>>(result, HttpStatus.OK);
+      return new ResponseEntity<List<Privilege>>(result, HttpStatus.OK);
     } catch(Exception e) {
       throw new PrivilegeNotFoundException();
     }
-    return response;
   }
 
   /**
@@ -81,17 +81,19 @@ public class PrivilegeController {
       @ApiResponse(code = 404, message = "Resultado no encontrado")
     }
   )
-  @ApiOperation(value = "Obtener un rol por su id")
+  @ApiImplicitParams({
+    @ApiImplicitParam(name = "id", value = "Privilege ID", required = true, dataType = "long", paramType = "query"),
+    @ApiImplicitParam(name = "response", value = "Http Response", required = true)
+  })
+  @ApiOperation(value = "Obtener un rol por su id", response = Privilege.class)
   @GetMapping("/privilege/{id}")
   public ResponseEntity<?> getPrivilege(@PathVariable Long id) {
-    ResponseEntity<?> response;
     try {
       Privilege result = privilegeRepository.findById(id).get();
-      response = new ResponseEntity<Privilege>(result, HttpStatus.OK);
+      return new ResponseEntity<Privilege>(result, HttpStatus.OK);
     }catch(Exception e) {
       throw new PrivilegeNotFoundException(id);
     }
-    return response;
   }
 
   /**
@@ -108,20 +110,22 @@ public class PrivilegeController {
       @ApiResponse(code = 404, message = "Resultado no encontrado")
     }
   )
-  @ApiOperation(value = "Guardar un privilegio")
+  @ApiImplicitParams({
+    @ApiImplicitParam(name = "privilege", value = "Privilege object", required = true, dataType = "object", paramType = "query"),
+    @ApiImplicitParam(name = "response", value = "Http Response", required = true)
+  })
+  @ApiOperation(value = "Guardar un privilegio", response = Privilege.class)
   @PostMapping("/privilege")
   public ResponseEntity<?> createPrivilege(@RequestBody Privilege privilege, HttpServletResponse response) {
-    ResponseEntity<?> response_;
     Privilege newPrivilege = new Privilege(
       privilege.getName()
     );
     if(!newPrivilege.equals(null)) {
       //response.setStatus(201);
-      response_ = new ResponseEntity<Privilege>(privilegeRepository.save(newPrivilege), HttpStatus.OK);
+      return new ResponseEntity<Privilege>(privilegeRepository.save(newPrivilege), HttpStatus.OK);
     }else {
-      response_ = new ResponseEntity<ErrorRest>(new ErrorRest("Datos incorrectos para crear privilegio"), HttpStatus.BAD_REQUEST);
+      return new ResponseEntity<ErrorRest>(new ErrorRest("Datos incorrectos para crear privilegio"), HttpStatus.BAD_REQUEST);
     }
-    return response_;
   }
 
   /**
@@ -138,19 +142,26 @@ public class PrivilegeController {
       @ApiResponse(code = 404, message = "Resultado no encontrado")
     }
   )
-  @ApiOperation(value = "Actualizar un privilegio encontrado por su id")
+  @ApiImplicitParams({
+    @ApiImplicitParam(name = "id", value = "Privilege ID", required = true, dataType = "long", paramType = "query"),
+    @ApiImplicitParam(name = "reqPrivilege", value = "RequestEntity", required = true)
+  })
+  @ApiOperation(value = "Actualizar un privilegio encontrado por su id", response = Privilege.class)
   @PutMapping("/privilege/{id}")
   public ResponseEntity<?> updatePrivilege(@PathVariable Long id, RequestEntity<Privilege> reqPrivilege) {
     if (reqPrivilege.getBody() == null) {
       return new ResponseEntity<ErrorRest>(new ErrorRest("Formato de petición incorrecto. Debe enviar los datos del privilegio a modificar"), HttpStatus.BAD_REQUEST);
     }
-    if (!privilegeRepository.findById(id).equals(null)) {
-      Privilege privilege = reqPrivilege.getBody();
-      Privilege privilegeUpdate = new Privilege(id, privilege.getName(), privilege.getRoles());
-      return new ResponseEntity<Privilege>(privilegeRepository.save(privilegeUpdate), HttpStatus.OK);
-    } else {
-      return new ResponseEntity<ErrorRest>(new ErrorRest("El privilegio a modificar no existe"),
-        HttpStatus.NOT_FOUND);
+    try {
+      if (!privilegeRepository.findById(id).equals(null)) {
+        Privilege privilege = reqPrivilege.getBody();
+        Privilege privilegeUpdate = new Privilege(id, privilege.getName(), privilege.getRoles());
+        return new ResponseEntity<Privilege>(privilegeRepository.save(privilegeUpdate), HttpStatus.OK);
+      } else {
+        throw new PrivilegeNotFoundException(id);
+      }
+    } catch(Exception e) {
+      throw e;
     }
   }
 
@@ -167,16 +178,18 @@ public class PrivilegeController {
       @ApiResponse(code = 404, message = "Resultado no encontrado")
     }
   )
-  @ApiOperation(value = "Eliminar un privilegio encontrado por su id")
+  @ApiImplicitParams({
+    @ApiImplicitParam(name = "id", value = "Privilege ID", required = true, dataType = "long", paramType = "query")
+  })
+  @ApiOperation(value = "Eliminar un privilegio encontrado por su id", response = Privilege.class)
   @DeleteMapping("/privilege/{id}")
   public ResponseEntity<?> deletePrivilege(@PathVariable Long id) {
-    Privilege privilegeDelete = privilegeRepository.findById(id).get();
-    if (privilegeDelete != null) {
+    try {
+      Privilege privilegeDelete = privilegeRepository.findById(id).get();
       privilegeRepository.delete(privilegeDelete);
       return new ResponseEntity<Privilege>(privilegeDelete, HttpStatus.OK);
-    } else {
-      return new ResponseEntity<ErrorRest>(new ErrorRest("El privilegio a borrar no existe"), 
-        HttpStatus.NOT_FOUND);
+    } catch(Exception e) {
+      throw new PrivilegeNotFoundException(id);
     }
   }
 

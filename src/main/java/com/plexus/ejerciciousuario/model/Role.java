@@ -15,6 +15,7 @@ import javax.persistence.Table;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
+import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 
 /**
@@ -25,6 +26,7 @@ import io.swagger.annotations.ApiModelProperty;
 
 @Entity
 @Table(name = "role")
+@ApiModel(value="Identificador", description="Clase entidad role")
 public class Role implements java.io.Serializable {
 
   private static final long serialVersionUID = 1L;
@@ -33,7 +35,7 @@ public class Role implements java.io.Serializable {
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   @Column(name = "role_id", unique=true)
   @ApiModelProperty(notes = "The database generated user ID")
-  private Long id;
+  private Long role_id;
 
   @Column(name = "name_role", length = 50)
   @ApiModelProperty(notes = "Nombre del rol")
@@ -62,7 +64,7 @@ public class Role implements java.io.Serializable {
    * @param id
    */
   public Role(Long id){
-    this.id = id;
+    this.role_id = id;
   }
 
   /**
@@ -71,7 +73,7 @@ public class Role implements java.io.Serializable {
    * @param name
    */
   public Role(Long id, String name) {
-    this.id = id;
+    this.role_id = id;
     this.name = name;
   }
 
@@ -83,7 +85,7 @@ public class Role implements java.io.Serializable {
    * @param privileges
    */
   public Role(Long id, String name, Set<User> users, Set<Privilege> privileges) {
-    this.id = id;
+    this.role_id = id;
     this.name = name;
     this.users = users;
     this.privileges = privileges;

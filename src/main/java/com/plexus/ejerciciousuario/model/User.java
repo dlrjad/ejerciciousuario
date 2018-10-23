@@ -13,6 +13,7 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToMany;
 import javax.persistence.Table;
 
+import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 
 /**
@@ -23,6 +24,7 @@ import io.swagger.annotations.ApiModelProperty;
 
 @Entity
 @Table(name = "users")
+@ApiModel(value="Identificador", description="Clase entidad user")
 public class User implements java.io.Serializable {
 
   private static final long serialVersionUID = 1L;
@@ -31,7 +33,7 @@ public class User implements java.io.Serializable {
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   @Column(name = "user_id", unique=true)
   @ApiModelProperty(notes = "The database generated user ID")
-  private Long id;
+  private Long user_id;
 
   @Column(name = "name_user", length = 50)
   @ApiModelProperty(notes = "Nombre del usuario")
@@ -60,7 +62,7 @@ public class User implements java.io.Serializable {
    * @param id
    */
   public User(Long id){
-    this.id = id;
+    this.user_id = id;
   }
 
   /**
@@ -83,7 +85,7 @@ public class User implements java.io.Serializable {
    * @param roles
    */
   public User(Long id, String name, String email, Set<Role> roles) {
-    this.id = id;
+    this.user_id = id;
     this.name = name;
     this.mail = email;
     this.roles = roles;

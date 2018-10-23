@@ -19,5 +19,6 @@ public class DemoApplication {
 		final Logger logger = LoggerFactory.getLogger(DemoApplication.class);
 		SpringApplication.run(DemoApplication.class, args);
 		logger.debug("--Application Started--");
+		logger.trace("--TRACE--");
 	}
 }
