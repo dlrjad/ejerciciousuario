@@ -1,0 +1,30 @@
+{
+    "run": {
+        "default": "",
+        "items": [
+            {
+                "name": "ejerciciousuario",
+                "projectName": "ejerciciousuario",
+                "workingDirectory": "c:\\Users\\Usuario\\z_Spring\\ejerciciousuario",
+                "args": [],
+                "vmargs": [],
+                "env": {},
+                "preLaunchTask": ""
+            }
+        ]
+    },
+    "debug": {
+        "default": "",
+        "items": [
+            {
+                "name": "ejerciciousuario",
+                "projectName": "ejerciciousuario",
+                "workingDirectory": "c:\\Users\\Usuario\\z_Spring\\ejerciciousuario",
+                "args": [],
+                "vmargs": [],
+                "env": {},
+                "preLaunchTask": ""
+            }
+        ]
+    }
+}
