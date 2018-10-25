@@ -1,6 +1,7 @@
 package com.plexus.ejerciciousuario.controller;
 
 import java.util.List;
+import java.util.Optional;
 
 import javax.servlet.http.HttpServletResponse;
 
@@ -9,6 +10,8 @@ import com.plexus.ejerciciousuario.exception.UserNotFoundException;
 import com.plexus.ejerciciousuario.model.User;
 import com.plexus.ejerciciousuario.repository.UserRepository;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.HttpStatus;
@@ -41,6 +44,8 @@ import io.swagger.annotations.ApiResponses;
 @Api(value="usermanagement", description="Operations to users")
 public class UserController {
 
+  private final Logger logger = LoggerFactory.getLogger(UserController.class);
+
   @Autowired
   @Qualifier("userRepository")
   UserRepository userRepository;
@@ -61,9 +66,12 @@ public class UserController {
   @GetMapping("/users")
   public ResponseEntity<?> getUsers() {
     try {
+      logger.debug("Ejecutando peticion HTTP GET");
+      logger.debug("Obteniendo los usuarios con HTTP GET");
       List<User> result = userRepository.findAll();
       return new ResponseEntity<List<User>>(result, HttpStatus.OK);
     } catch(Exception e) {
+      logger.debug("Exception NOT_FOUND");
       throw new UserNotFoundException();
     }
   }
@@ -90,12 +98,21 @@ public class UserController {
   @GetMapping("/user/{id}")
   public ResponseEntity<?> getUserById(@PathVariable Long id, HttpServletResponse response) {
     try {
+      logger.debug("Ejecutando peticion HTTP GET indicando una id");
       User result = userRepository.findById(id).get();
-      //response.setStatus(201);
+      //response.setStatus(200);
+      logger.debug("Obteniendo usuario con HTTP GET indicando una id");
       return new ResponseEntity<User>(result, HttpStatus.OK);
     } catch(Exception e) {
-      //response.setStatus(404);
-      throw new UserNotFoundException(id);
+      if(e.getMessage().equals("No value present")) {
+        //response.setStatus(404);
+        logger.debug("Exception NOT_FOUND");
+        throw new UserNotFoundException(id);
+      } else {
+        //response.setStatus(400);
+        logger.debug("Exception BAD_REQUEST");
+        return new ResponseEntity<ErrorRest>(new ErrorRest(e.getMessage()), HttpStatus.BAD_REQUEST);
+      }
     }
   }
 
@@ -120,16 +137,23 @@ public class UserController {
   @ApiOperation(value = "Guardar un usuario", response = User.class)
   @PostMapping("/user")
   public ResponseEntity<?> createUser(@RequestBody User user, HttpServletResponse response) {
-    User newUser = new User(
-      user.getName(),
-      user.getMail()
-    );
-    if(!newUser.equals(null)) {
+    if (user.equals(null)) {
+      logger.debug("Exception BAD_REQUEST");
+      return new ResponseEntity<ErrorRest>(new ErrorRest("Formato de peticion incorrecto. Debe enviar los datos del usuario a crear"), HttpStatus.BAD_REQUEST);
+    }
+    try {
+      logger.debug("Ejecutando peticion HTTP POST");
+      User newUser = new User(
+        user.getName(),
+        user.getMail()
+      );
       //response.setStatus(201);
-      return new ResponseEntity<User>(userRepository.save(user), HttpStatus.OK);
-    } else {
+      logger.debug("Creando usuario con HTTP POST");
+      return new ResponseEntity<User>(userRepository.save(newUser), HttpStatus.OK);
+    } catch(Exception e) {
       //response.setStatus(400);
-      return new ResponseEntity<ErrorRest>(new ErrorRest("Datos incorrectos para crear usuario"), HttpStatus.BAD_REQUEST);
+      logger.debug("Exception METHOD_NOT_ALLOWED");
+      return new ResponseEntity<ErrorRest>(new ErrorRest(e.getMessage()), HttpStatus.METHOD_NOT_ALLOWED);
     }
   }
 
@@ -154,19 +178,30 @@ public class UserController {
   @ApiOperation(value = "Actualizar un usuario encontrado por su id", response = User.class)
   @PutMapping("/user/{id}")
   public ResponseEntity<?> updateUser(@PathVariable Long id, RequestEntity<User> reqUser) {
-    if (reqUser.getBody() == null) {
-      return new ResponseEntity<ErrorRest>(new ErrorRest("Formato de petición incorrecto. Debe enviar los datos del usuario a modificar"), HttpStatus.BAD_REQUEST);
+    if (reqUser.getBody().equals(null)) {
+      logger.debug("Exception METHOD_NOT_ALLOWED");
+      return new ResponseEntity<ErrorRest>(new ErrorRest("Formato de peticion incorrecto. Debe enviar los datos del usuario a modificar"), HttpStatus.METHOD_NOT_ALLOWED);
     } 
     try {
-      if (!userRepository.findById(id).equals(null) && userRepository.existsById(id)) {
-        User user = reqUser.getBody();
-        User userUpdate = new User(id, user.getName(), user.getMail(), user.getRoles());
+      Optional<User> aux = userRepository.findById(id);
+      if (aux.isPresent()) {
+        logger.debug("Ejecutando peticion HTTP PUT");
+        User userUpdate = aux.get();
+        userUpdate.setMail(reqUser.getBody().getMail());
+        userUpdate.setName(reqUser.getBody().getName());
+        userUpdate.setRoles(reqUser.getBody().getRoles());
+        logger.debug("Actualizando usuario con HTTP PUT");
         return new ResponseEntity<User>(userRepository.save(userUpdate), HttpStatus.OK);
       } else {
         throw new UserNotFoundException(id);
       }
     } catch(Exception e) {
-      throw e;
+      if(e.getMessage().equals("No value present")) {
+        logger.debug("Exception NOT_FOUND");
+        throw new UserNotFoundException(id);
+      }
+      logger.debug("Exception BAD_REQUEST");
+      return new ResponseEntity<ErrorRest>(new ErrorRest(e.getMessage()), HttpStatus.BAD_REQUEST);
     }
   }
 
@@ -190,11 +225,18 @@ public class UserController {
   @DeleteMapping("/user/{id}")
   public ResponseEntity<?> deleteUser(@PathVariable Long id) {
     try {
+      logger.debug("Ejecutando peticion HTTP DELETE");
       User userDelete = userRepository.findById(id).get();
       userRepository.delete(userDelete);
+      logger.debug("Eliminando usuario con HTTP DELETE");
       return new ResponseEntity<User>(userDelete, HttpStatus.OK);
     } catch(Exception e) {
-      throw new UserNotFoundException(id);
+      if(e.getMessage().equals("No value present")) {
+        logger.debug("Exception NOT_FOUND");
+        throw new UserNotFoundException(id);
+      }
+      logger.debug("Exception BAD_REQUEST"); 
+      return new ResponseEntity<ErrorRest>(new ErrorRest(e.getMessage()), HttpStatus.BAD_REQUEST);
     }
   }
 

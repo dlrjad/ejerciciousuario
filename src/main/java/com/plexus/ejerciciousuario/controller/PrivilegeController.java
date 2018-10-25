@@ -1,6 +1,7 @@
 package com.plexus.ejerciciousuario.controller;
 
 import java.util.List;
+import java.util.Optional;
 
 import javax.servlet.http.HttpServletResponse;
 
@@ -9,6 +10,8 @@ import com.plexus.ejerciciousuario.exception.PrivilegeNotFoundException;
 import com.plexus.ejerciciousuario.model.Privilege;
 import com.plexus.ejerciciousuario.repository.PrivilegeRepository;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.HttpStatus;
@@ -41,6 +44,8 @@ import io.swagger.annotations.ApiResponses;
 @Api(value="privilegemanagement", description="Operations to privileges")
 public class PrivilegeController {
 
+  private final Logger logger = LoggerFactory.getLogger(UserController.class);
+
   @Autowired
   @Qualifier("privilegeRepository")
   PrivilegeRepository privilegeRepository;
@@ -61,9 +66,12 @@ public class PrivilegeController {
   @GetMapping("/privileges")
   public ResponseEntity<?> getPrivileges() {
     try {
+      logger.debug("Ejecutando peticion HTTP GET");
+      logger.debug("Obteniendo los privilegios con HTTP GET");
       List<Privilege> result = privilegeRepository.findAll();
       return new ResponseEntity<List<Privilege>>(result, HttpStatus.OK);
     } catch(Exception e) {
+      logger.debug("Exception NOT_FOUND");
       throw new PrivilegeNotFoundException();
     }
   }
@@ -89,10 +97,18 @@ public class PrivilegeController {
   @GetMapping("/privilege/{id}")
   public ResponseEntity<?> getPrivilege(@PathVariable Long id) {
     try {
+      logger.debug("Ejecutando peticion HTTP GET indicando una id");
       Privilege result = privilegeRepository.findById(id).get();
+      logger.debug("Obteniendo privilegio con HTTP GET indicando una id");
       return new ResponseEntity<Privilege>(result, HttpStatus.OK);
-    }catch(Exception e) {
-      throw new PrivilegeNotFoundException(id);
+    } catch(Exception e) {
+      if(e.getMessage().equals("No value present")) {
+        logger.debug("Exception NOT_FOUND");
+        throw new PrivilegeNotFoundException(id);
+      } else {
+        logger.debug("Exception BAD_REQUEST");
+        return new ResponseEntity<ErrorRest>(new ErrorRest(e.getMessage()), HttpStatus.BAD_REQUEST);
+      }
     }
   }
 
@@ -117,14 +133,22 @@ public class PrivilegeController {
   @ApiOperation(value = "Guardar un privilegio", response = Privilege.class)
   @PostMapping("/privilege")
   public ResponseEntity<?> createPrivilege(@RequestBody Privilege privilege, HttpServletResponse response) {
-    Privilege newPrivilege = new Privilege(
-      privilege.getName()
-    );
-    if(!newPrivilege.equals(null)) {
+    if (privilege.equals(null)) {
+      logger.debug("Exception BAD_REQUEST");
+      return new ResponseEntity<ErrorRest>(new ErrorRest("Formato de peticion incorrecto. Debe enviar los datos del privilegio a crear"), HttpStatus.BAD_REQUEST);
+    }
+    try {
+      logger.debug("Ejecutando petición HTTP POST");
+        Privilege newPrivilege = new Privilege(
+        privilege.getName()
+      );
       //response.setStatus(201);
+      logger.debug("Creando privilegio con HTTP POST");
       return new ResponseEntity<Privilege>(privilegeRepository.save(newPrivilege), HttpStatus.OK);
-    }else {
-      return new ResponseEntity<ErrorRest>(new ErrorRest("Datos incorrectos para crear privilegio"), HttpStatus.BAD_REQUEST);
+    } catch(Exception e) {
+      //response.setStatus(400);
+      logger.debug("Exception METHOD_NOT_ALLOWED");
+      return new ResponseEntity<ErrorRest>(new ErrorRest(e.getMessage()), HttpStatus.METHOD_NOT_ALLOWED);
     }
   }
 
@@ -150,18 +174,28 @@ public class PrivilegeController {
   @PutMapping("/privilege/{id}")
   public ResponseEntity<?> updatePrivilege(@PathVariable Long id, RequestEntity<Privilege> reqPrivilege) {
     if (reqPrivilege.getBody() == null) {
-      return new ResponseEntity<ErrorRest>(new ErrorRest("Formato de petición incorrecto. Debe enviar los datos del privilegio a modificar"), HttpStatus.BAD_REQUEST);
+      logger.debug("Exception METHOD_NOT_ALLOWED");
+      return new ResponseEntity<ErrorRest>(new ErrorRest("Formato de peticion incorrecto. Debe enviar los datos del privilegio a modificar"), HttpStatus.METHOD_NOT_ALLOWED);
     }
     try {
-      if (!privilegeRepository.findById(id).equals(null)) {
-        Privilege privilege = reqPrivilege.getBody();
-        Privilege privilegeUpdate = new Privilege(id, privilege.getName(), privilege.getRoles());
-        return new ResponseEntity<Privilege>(privilegeRepository.save(privilegeUpdate), HttpStatus.OK);
+      Optional<Privilege> aux = privilegeRepository.findById(id);
+      if (aux.isPresent()) {
+        logger.debug("Ejecutando peticion HTTP PUT");
+        Privilege toUpdate = aux.get();
+        toUpdate.setRoles(reqPrivilege.getBody().getRoles());
+        toUpdate.setName(reqPrivilege.getBody().getName());
+        logger.debug("Actualizando privilegio con HTTP PUT");
+        return new ResponseEntity<Privilege>(privilegeRepository.save(toUpdate), HttpStatus.OK);
       } else {
         throw new PrivilegeNotFoundException(id);
       }
     } catch(Exception e) {
-      throw e;
+      if(e.getMessage().equals("No value present")) {
+        logger.debug("Exception NOT_FOUND");
+        throw new PrivilegeNotFoundException(id);
+      }
+      logger.debug("Exception BAD_REQUEST");
+      return new ResponseEntity<ErrorRest>(new ErrorRest(e.getMessage()), HttpStatus.BAD_REQUEST);
     }
   }
 
@@ -185,11 +219,18 @@ public class PrivilegeController {
   @DeleteMapping("/privilege/{id}")
   public ResponseEntity<?> deletePrivilege(@PathVariable Long id) {
     try {
+      logger.debug("Ejecutando peticion HTTP DELETE");
       Privilege privilegeDelete = privilegeRepository.findById(id).get();
       privilegeRepository.delete(privilegeDelete);
+      logger.debug("Eliminando privilegio con HTTP DELETE");
       return new ResponseEntity<Privilege>(privilegeDelete, HttpStatus.OK);
     } catch(Exception e) {
-      throw new PrivilegeNotFoundException(id);
+      if(e.getMessage().equals("No value present")) {
+        logger.debug("Exception NOT_FOUND");
+        throw new PrivilegeNotFoundException(id);
+      }
+      logger.debug("Exception BAD_REQUEST");
+      return new ResponseEntity<ErrorRest>(new ErrorRest(e.getMessage()), HttpStatus.BAD_REQUEST);
     }
   }
 

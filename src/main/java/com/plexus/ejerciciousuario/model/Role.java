@@ -34,7 +34,7 @@ public class Role implements java.io.Serializable {
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   @Column(name = "role_id", unique=true)
-  @ApiModelProperty(notes = "The database generated user ID")
+  @ApiModelProperty(notes = "The database generated role ID")
   private Long role_id;
 
   @Column(name = "name_role", length = 50)
@@ -44,13 +44,13 @@ public class Role implements java.io.Serializable {
   @ManyToMany(mappedBy="roles")
   @JsonIgnore
   private Set<User> users;
-
+  
   @ManyToMany(cascade = {
     CascadeType.ALL
   })
   @JoinTable(name="role_privilege",
-    joinColumns = {@JoinColumn(name="role_id")},
-    inverseJoinColumns = {@JoinColumn(name = "privilege_id")}
+  joinColumns = {@JoinColumn(name="role_id")},
+  inverseJoinColumns = {@JoinColumn(name = "privilege_id")}
   )
   private Set<Privilege> privileges;
   
@@ -58,25 +58,15 @@ public class Role implements java.io.Serializable {
    * Constructor por omisión
    */
   public Role() {}
-
+  
   /**
-   * Constructor para inicializar atributo id
-   * @param id
-   */
-  public Role(Long id){
-    this.role_id = id;
-  }
-
-  /**
-   * Constructor para inicializar los atributos id y name 
-   * @param id
+   * Constructor para inicializar atributo nombre
    * @param name
    */
-  public Role(Long id, String name) {
-    this.role_id = id;
+  public Role(String name) {
     this.name = name;
   }
-
+    
   /**
    * Constructor para inicializar los atributos id, name, users y privileges
    * @param id
@@ -92,13 +82,21 @@ public class Role implements java.io.Serializable {
   }
 
   /**
-   * Constructor para inicializar atributo nombre
-   * @param name
+   * Método para obtener el id
+   * @return Long retorna el id
    */
-  public Role(String name) {
-    this.name = name;
+  public Long getRole_id() {
+    return this.role_id;
   }
 
+  /**
+   * Método para guardar la id
+   * @param role_id
+   */
+  public void setRole_id(Long role_id) {
+    this.role_id = role_id;
+  }
+  
   /**
    * Método obtener nombre
    * @return String retorna el nombre
@@ -108,13 +106,21 @@ public class Role implements java.io.Serializable {
   }
 
   /**
+   * Método establecer nombre
+   * @param name <String> nombre
+   */
+  public void setName(String name) {
+    this.name = name;
+  }
+  
+  /**
    * Método obtener usuarios
    * @return Set<User> retorna los usuarios
    */
   public Set<User> getUsers() {
     return users;
   }
-
+  
   /**
    * Método pra guardar los usuarios
    * @param users
@@ -122,7 +128,7 @@ public class Role implements java.io.Serializable {
   public void setUser(Set<User> users) {
     this.users = users;
   }
-
+  
   /**
    * Método obtener privilegios
    * @return Set<Privilege> retorna los privilegios
@@ -130,7 +136,7 @@ public class Role implements java.io.Serializable {
   public Set<Privilege> getPrivileges() {
     return privileges;
   }
-
+  
   /**
    * Método para guardar los privilegios
    * @param privileges

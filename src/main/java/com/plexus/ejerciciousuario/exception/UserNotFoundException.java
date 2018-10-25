@@ -11,7 +11,7 @@ public class UserNotFoundException extends RuntimeException {
     super("No existe ningún usuario");
   }
   public UserNotFoundException(Long id) {
-    super(String.format("No existe ningún empleado con el ID = %d", id));
+    super(String.format("No existe ningún usuario con el ID = %d", id));
   }
 
 }

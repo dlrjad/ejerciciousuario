@@ -31,37 +31,29 @@ public class Privilege implements java.io.Serializable {
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   @Column(name = "privilege_id", unique=true)
-  @ApiModelProperty(notes = "The database generated user ID")
+  @ApiModelProperty(notes = "The database generated privilege ID")
   private Long privilege_id;
 
+  
   @Column(name = "name_privilege", length = 50)
   @ApiModelProperty(notes = "Nombre del privilegio")
   private String name;
-
+  
+  
   @ManyToMany(mappedBy="privileges")
   @JsonIgnore
   private Set<Role> roles;
-
+  
   /**
    * Constructor por omisión
    */
   public Privilege() {}
-
+  
   /**
-   * Constructor para inicializar atributo id
-   * @param id
-   */
-  public Privilege(Long id){
-    this.privilege_id = id;
-  }
-
-  /**
-   * Constructor para inicializar los atributos id y name
-   * @param id
+   * Constructor para inicializar atributo nombre
    * @param name
    */
-  public Privilege(Long id, String name) {
-    this.privilege_id = id;
+  public Privilege(String name) {
     this.name = name;
   }
 
@@ -78,11 +70,19 @@ public class Privilege implements java.io.Serializable {
   }
 
   /**
-   * Constructor para inicializar atributo nombre
-   * @param name
+   * Método para obtener el id
+   * @return Long retorna el id
    */
-  public Privilege(String name) {
-    this.name = name;
+  public Long getPrivilege_id() {
+    return this.privilege_id;
+  }
+
+  /**
+   * Método para guardar id
+   * @param privilege_id
+   */
+  public void setPrivilege_id(Long privilege_id) {
+    this.privilege_id = privilege_id;
   }
 
   /**
@@ -92,7 +92,15 @@ public class Privilege implements java.io.Serializable {
   public String getName() {
     return this.name;
   }
-
+  
+  /**
+   * Método establecer nombre
+   * @param name <String> nombre
+   */
+  public void setName(String name) {
+    this.name = name;
+  }
+  
   /**
    * Método obtener roles
    * @return Set<Role> retorna los roles
@@ -105,7 +113,7 @@ public class Privilege implements java.io.Serializable {
    * Método para guardar los roles
    * @param roles
    */
-  public void setPrivileges(Set<Role> roles) {
+  public void setRoles(Set<Role> roles) {
     this.roles = roles;
   }
 

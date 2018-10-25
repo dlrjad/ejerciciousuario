@@ -1,26 +1,14 @@
 {
-  "configurations": [
-    {
-      "type": "java",
-      "name": "CodeLens (Launch) - SwaggerConfig",
-      "request": "launch",
-      "cwd": "${workspaceFolder}",
-      "console": "internalConsole",
-      "stopOnEntry": false,
-      "mainClass": "com.plexus.ejerciciousuario.config.SwaggerConfig",
-      "args": "",
-      "projectName": "ejerciciousuario"
-    },
-    {
-      "type": "java",
-      "name": "CodeLens (Launch) - DemoApplication",
-      "request": "launch",
-      "cwd": "${workspaceFolder}",
-      "console": "internalConsole",
-      "stopOnEntry": false,
-      "mainClass": "com.plexus.ejerciciousuario.DemoApplication",
-      "args": "",
-      "projectName": "ejerciciousuario"
-    }
-  ]
+    "configurations": [
+        {
+            "type": "java",
+            "name": "Spring Boot-DemoApplication<ejerciciousuario>",
+            "request": "launch",
+            "cwd": "${workspaceFolder}",
+            "console": "internalConsole",
+            "mainClass": "com.plexus.ejerciciousuario.DemoApplication",
+            "projectName": "ejerciciousuario",
+            "args": ""
+        }
+    ]
 }

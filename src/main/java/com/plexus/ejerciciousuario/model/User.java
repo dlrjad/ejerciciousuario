@@ -35,48 +35,39 @@ public class User implements java.io.Serializable {
   @ApiModelProperty(notes = "The database generated user ID")
   private Long user_id;
 
+  
   @Column(name = "name_user", length = 50)
   @ApiModelProperty(notes = "Nombre del usuario")
   private String name;
-
+  
   @Column(name = "email", length = 50)
   @ApiModelProperty(notes = "Email del usuario")
   private String mail;
-
+  
   @ManyToMany(cascade = { 
     CascadeType.ALL
   })
   @JoinTable(name="user_role",
-    joinColumns = {@JoinColumn(name="user_id")},
-    inverseJoinColumns = {@JoinColumn(name = "role_id")}
+  joinColumns = {@JoinColumn(name="user_id")},
+  inverseJoinColumns = {@JoinColumn(name = "role_id")}
   )
   private Set<Role> roles;
-
+  
   /**
    * Costructor por omisión
    */
   public User() {}
 
   /**
-   * Constructor para inicializar atributo id
-   * @param id
-   */
-  public User(Long id){
-    this.user_id = id;
-  }
-
-  /**
-   * Constructor para inicializar los atributos name, mail y roles
+   * Constructor para inicializar los atributos name y email
    * @param name
    * @param email
-   * @param roles
    */
-  public User(String name, String email, Set<Role> roles) {
+  public User(String name, String email) {
     this.name = name;
     this.mail = email;
-    this.roles = roles;
   }
-
+    
   /**
    * Constructor para inicializar los atributos id, name, email y roles
    * @param id
@@ -90,15 +81,21 @@ public class User implements java.io.Serializable {
     this.mail = email;
     this.roles = roles;
   }
+  
+  /**
+   * Método para obtener el id
+   * @return Long retorna el id
+   */
+  public Long getUser_id() {
+    return this.user_id;
+  }
 
   /**
-   * Constructor para inicializar los atributos name y email
-   * @param name
-   * @param email
+   * Método para guardar id
+   * @param user_id
    */
-  public User(String name, String email) {
-    this.name = name;
-    this.mail = email;
+  public void setUser_id(Long user_id) {
+    this.user_id = user_id;
   }
 
   /**
@@ -110,11 +107,27 @@ public class User implements java.io.Serializable {
   }
 
   /**
+   * Método para guardar el nombre
+   * @param name
+   */
+  public void setName(String name){
+    this.name = name;
+  }
+
+  /**
    * Método obtener mail
    * @return String retorna el mail
    */
   public String getMail() {
 	  return this.mail;
+  }
+
+  /**
+   * Método para guardar el mail
+   * @param mail
+   */
+  public void setMail(String mail){
+    this.mail = mail;
   }
 
   /**

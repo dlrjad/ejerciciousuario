@@ -1,6 +1,7 @@
 package com.plexus.ejerciciousuario.controller;
 
 import java.util.List;
+import java.util.Optional;
 
 import javax.servlet.http.HttpServletResponse;
 
@@ -9,6 +10,8 @@ import com.plexus.ejerciciousuario.exception.RoleNotFoundException;
 import com.plexus.ejerciciousuario.model.Role;
 import com.plexus.ejerciciousuario.repository.RoleRepository;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.HttpStatus;
@@ -41,6 +44,8 @@ import io.swagger.annotations.ApiResponses;
 @Api(value="rolemanagement", description="Operations to roles")
 public class RoleController {
 
+  private final Logger logger = LoggerFactory.getLogger(RoleController.class);
+
   @Autowired
   @Qualifier("roleRepository")
   RoleRepository roleRepository;
@@ -61,9 +66,12 @@ public class RoleController {
   @GetMapping("/roles")
   public ResponseEntity<?> getRoles() {
     try {
+      logger.debug("Ejecutando peticion HTTP GET");
+      logger.debug("Obteniendo los roles con HTTP GET");
       List<Role> result = roleRepository.findAll();
       return new ResponseEntity<List<Role>>(result, HttpStatus.OK);
     } catch(Exception e) {
+      logger.debug("Exception NOT_FOUND");
       throw new RoleNotFoundException();
     }
   }
@@ -89,10 +97,18 @@ public class RoleController {
   @GetMapping("/role/{id}")
   public ResponseEntity<?> getRole(@PathVariable Long id) {
     try {
+      logger.debug("Ejecutando peticion HTTP GET indicando una id");
       Role result = roleRepository.findById(id).get();
+      logger.debug("Obteniendo rol con HTTP GET indicando una id");
       return new ResponseEntity<Role>(result, HttpStatus.OK);
     } catch(Exception e) {
-      throw new RoleNotFoundException(id);
+      if(e.getMessage().equals("No value present")) {
+        logger.debug("Exception NOT_FOUND");
+        throw new RoleNotFoundException(id);
+      } else {
+        logger.debug("Exception BAD_REQUEST");
+        return new ResponseEntity<ErrorRest>(new ErrorRest(e.getMessage()), HttpStatus.BAD_REQUEST);
+      }
     }
   }
 
@@ -117,14 +133,21 @@ public class RoleController {
   @ApiOperation(value = "Guardar un rol", response = Role.class)
   @PostMapping("/role")
   public ResponseEntity<?> createRole(@RequestBody Role role, HttpServletResponse response) {
-    Role newRole = new Role(
-      role.getName()
-    );
-    if(!newRole.equals(null)) {
+    if (role.equals(null)) {
+      logger.debug("Exception BAD_REQUEST");
+      return new ResponseEntity<ErrorRest>(new ErrorRest("Formato de peticion incorrecto. Debe enviar los datos del rol a crear"), HttpStatus.BAD_REQUEST);
+    }
+    try {
+      logger.debug("Ejecutando petición HTTP POST");
+      Role newRole = new Role(
+        role.getName()
+      );
       //response.setStatus(201);
+      logger.debug("Creando usuario con HTTP POST");
       return new ResponseEntity<Role>(roleRepository.save(newRole), HttpStatus.OK);
-    }else {
-      return new ResponseEntity<ErrorRest>(new ErrorRest("Datos incorrectos para crear rol"), HttpStatus.BAD_REQUEST);
+    } catch(Exception e) {
+      logger.debug("Exception METHOD_NOT_ALLOWED");
+      return new ResponseEntity<ErrorRest>(new ErrorRest(e.getMessage()), HttpStatus.METHOD_NOT_ALLOWED);
     }
   }
 
@@ -150,18 +173,29 @@ public class RoleController {
   @PutMapping("/role/{id}")
   public ResponseEntity<?> updateRole(@PathVariable Long id, RequestEntity<Role> reqRole) {
     if (reqRole.getBody() == null) {
-      return new ResponseEntity<ErrorRest>(new ErrorRest("Formato de petición incorrecto. Debe enviar los datos del rol a modificar"), HttpStatus.BAD_REQUEST);
+      logger.debug("Exception METHOD_NOT_ALLOWED");
+      return new ResponseEntity<ErrorRest>(new ErrorRest("Formato de peticion incorrecto. Debe enviar los datos del rol a modificar"), HttpStatus.METHOD_NOT_ALLOWED);
     } 
     try {
-      if (!roleRepository.findById(id).equals(null) && roleRepository.existsById(id)) {
-        Role role = reqRole.getBody();
-        Role roleUpdate = new Role(id, role.getName(), role.getUsers(), role.getPrivileges());
+      Optional<Role> aux = roleRepository.findById(id);
+      if (aux.isPresent()) {
+        logger.debug("Ejecutando peticion HTTP PUT");
+        Role roleUpdate = aux.get();
+        roleUpdate.setPrivileges(reqRole.getBody().getPrivileges());
+        roleUpdate.setUser(reqRole.getBody().getUsers());
+        roleUpdate.setName(reqRole.getBody().getName());
+        logger.debug("Actualizando rol con HTTP PUT");
         return new ResponseEntity<Role>(roleRepository.save(roleUpdate), HttpStatus.OK);
       } else {
         throw new RoleNotFoundException(id);
       } 
     } catch(Exception e) {
-      throw e;
+      if(e.getMessage().equals("No value present")) {
+        logger.debug("Exception NOT_FOUND");
+        throw new RoleNotFoundException(id);
+      }
+      logger.debug("Exception BAD_REQUEST");
+      return new ResponseEntity<ErrorRest>(new ErrorRest(e.getMessage()), HttpStatus.BAD_REQUEST);
     }
   }
 
@@ -185,11 +219,18 @@ public class RoleController {
   @DeleteMapping("/role/{id}")
   public ResponseEntity<?> deleteRole(@PathVariable Long id) {
     try {
+      logger.debug("Ejecutando petición con HTTP DELETE");
       Role roleDelete = roleRepository.findById(id).get();
       roleRepository.delete(roleDelete);
+      logger.debug("Eliminando rol con HTTP DELETE");
       return new ResponseEntity<Role>(roleDelete, HttpStatus.OK);
     } catch(Exception e) {
-      throw new RoleNotFoundException(id);
+      if(e.getMessage().equals("No value present")) {
+        logger.debug("Exception NOT_FOUND");
+        throw new RoleNotFoundException(id);
+      }
+      logger.debug("Exception BAD_REQUEST"); 
+      return new ResponseEntity<ErrorRest>(new ErrorRest(e.getMessage()), HttpStatus.BAD_REQUEST);
     }
   }
 
