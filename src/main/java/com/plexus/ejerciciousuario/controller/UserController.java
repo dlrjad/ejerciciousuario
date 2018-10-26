@@ -227,6 +227,7 @@ public class UserController {
     try {
       logger.debug("Ejecutando peticion HTTP DELETE");
       User userDelete = userRepository.findById(id).get();
+      userDelete.getRoles().clear();
       userRepository.delete(userDelete);
       logger.debug("Eliminando usuario con HTTP DELETE");
       return new ResponseEntity<User>(userDelete, HttpStatus.OK);

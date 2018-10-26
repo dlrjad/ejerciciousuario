@@ -8,6 +8,7 @@ import javax.servlet.http.HttpServletResponse;
 import com.plexus.ejerciciousuario.exception.ErrorRest;
 import com.plexus.ejerciciousuario.exception.PrivilegeNotFoundException;
 import com.plexus.ejerciciousuario.model.Privilege;
+import com.plexus.ejerciciousuario.model.Role;
 import com.plexus.ejerciciousuario.repository.PrivilegeRepository;
 
 import org.slf4j.Logger;
@@ -221,6 +222,9 @@ public class PrivilegeController {
     try {
       logger.debug("Ejecutando peticion HTTP DELETE");
       Privilege privilegeDelete = privilegeRepository.findById(id).get();
+      for(Role role: privilegeDelete.getRoles()) {
+    	  role.getPrivileges().clear();
+      }
       privilegeRepository.delete(privilegeDelete);
       logger.debug("Eliminando privilegio con HTTP DELETE");
       return new ResponseEntity<Privilege>(privilegeDelete, HttpStatus.OK);

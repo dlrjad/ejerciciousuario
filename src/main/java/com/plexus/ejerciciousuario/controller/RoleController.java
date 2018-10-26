@@ -8,6 +8,7 @@ import javax.servlet.http.HttpServletResponse;
 import com.plexus.ejerciciousuario.exception.ErrorRest;
 import com.plexus.ejerciciousuario.exception.RoleNotFoundException;
 import com.plexus.ejerciciousuario.model.Role;
+import com.plexus.ejerciciousuario.model.User;
 import com.plexus.ejerciciousuario.repository.RoleRepository;
 
 import org.slf4j.Logger;
@@ -221,6 +222,10 @@ public class RoleController {
     try {
       logger.debug("Ejecutando petición con HTTP DELETE");
       Role roleDelete = roleRepository.findById(id).get();
+      for(User user: roleDelete.getUsers()) {
+    	  user.getRoles().clear();//user.getRoles().remove(roleDelete);
+      }
+      roleDelete.getPrivileges().clear();
       roleRepository.delete(roleDelete);
       logger.debug("Eliminando rol con HTTP DELETE");
       return new ResponseEntity<Role>(roleDelete, HttpStatus.OK);
