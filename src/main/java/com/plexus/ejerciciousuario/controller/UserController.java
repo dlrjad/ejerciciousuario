@@ -50,6 +50,11 @@ public class UserController {
   @Qualifier("userRepository")
   UserRepository userRepository;
 
+  @Autowired
+  public UserController(UserRepository userRepository) {
+    this.userRepository = userRepository;
+  }
+
   /**
    * Método GET obtener todos los usuarios
    * @return retorna todos los usuarios en caso de éxito
