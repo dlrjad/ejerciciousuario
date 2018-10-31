@@ -44,9 +44,7 @@ public class User implements java.io.Serializable {
   @ApiModelProperty(notes = "Email del usuario")
   private String mail;
   
-  @ManyToMany(cascade = { 
-    CascadeType.ALL
-  })
+  @ManyToMany
   @JoinTable(name="user_role",
   joinColumns = {@JoinColumn(name="user_id")},
   inverseJoinColumns = {@JoinColumn(name = "role_id")}

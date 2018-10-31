@@ -223,7 +223,8 @@ public class RoleController {
       logger.debug("Ejecutando petición con HTTP DELETE");
       Role roleDelete = roleRepository.findById(id).get();
       for(User user: roleDelete.getUsers()) {
-    	  user.getRoles().clear();//user.getRoles().remove(roleDelete);
+        //user.getRoles().clear();//user.getRoles().remove(roleDelete);
+        user.getRoles().removeIf(e -> e.equals(roleDelete));
       }
       roleDelete.getPrivileges().clear();
       roleRepository.delete(roleDelete);

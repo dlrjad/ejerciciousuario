@@ -223,7 +223,8 @@ public class PrivilegeController {
       logger.debug("Ejecutando peticion HTTP DELETE");
       Privilege privilegeDelete = privilegeRepository.findById(id).get();
       for(Role role: privilegeDelete.getRoles()) {
-    	  role.getPrivileges().clear();
+        //role.getPrivileges().clear();
+        role.getPrivileges().removeIf(e -> e.equals(privilegeDelete));
       }
       privilegeRepository.delete(privilegeDelete);
       logger.debug("Eliminando privilegio con HTTP DELETE");

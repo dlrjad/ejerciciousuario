@@ -45,9 +45,7 @@ public class Role implements java.io.Serializable {
   @JsonIgnore
   private Set<User> users;
   
-  @ManyToMany(cascade = {
-    CascadeType.ALL
-  })
+  @ManyToMany
   @JoinTable(name="role_privilege",
   joinColumns = {@JoinColumn(name="role_id")},
   inverseJoinColumns = {@JoinColumn(name = "privilege_id")}
