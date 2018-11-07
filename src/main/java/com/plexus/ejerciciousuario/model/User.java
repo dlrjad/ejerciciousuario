@@ -39,7 +39,11 @@ public class User implements java.io.Serializable {
   @Column(name = "name_user", length = 50)
   @ApiModelProperty(notes = "Nombre del usuario")
   private String name;
-  
+
+  @Column(name = "password", length = 50)
+  @ApiModelProperty(notes = "Password del usuario")
+  private String password;
+
   @Column(name = "email", length = 50)
   @ApiModelProperty(notes = "Email del usuario")
   private String mail;
@@ -59,23 +63,27 @@ public class User implements java.io.Serializable {
   /**
    * Constructor para inicializar los atributos name y email
    * @param name
+   * @param password
    * @param email
    */
-  public User(String name, String email) {
+  public User(String name, String password, String email) {
     this.name = name;
+    this.password = password;
     this.mail = email;
   }
-    
+  
   /**
-   * Constructor para inicializar los atributos id, name, email y roles
+   * Constructor para inicializar los atributos id, name, password, email y roles
    * @param id
    * @param name
+   * @param password
    * @param email
    * @param roles
    */
-  public User(Long id, String name, String email, Set<Role> roles) {
+  public User(Long id, String name, String password, String email, Set<Role> roles) {
     this.user_id = id;
     this.name = name;
+    this.password = password;
     this.mail = email;
     this.roles = roles;
   }
@@ -110,6 +118,22 @@ public class User implements java.io.Serializable {
    */
   public void setName(String name){
     this.name = name;
+  }
+
+  /**
+   * Método obtener password
+   * @return String retorna el password
+   */
+  public String getPassword() {
+    return this.password;
+  }
+
+  /**
+   * Método para guardar el password
+   * @param password
+   */
+  public void setPassword(String password) {
+    this.password = password;
   }
 
   /**

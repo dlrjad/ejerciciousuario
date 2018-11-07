@@ -56,7 +56,7 @@ public class UserIntegrationTests {
 
   @Test
 	public void testPostUser() throws Exception {
-    User user = new User("Juan60test", "juan60test@mail.com");
+    User user = new User("Juan60test", "password", "juan60test@mail.com");
     this.mockMvc.perform(post("/api/user")    
     .content(util.asJsonString(user))
     .contentType(MediaType.APPLICATION_JSON)
