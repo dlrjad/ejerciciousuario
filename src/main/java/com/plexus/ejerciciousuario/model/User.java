@@ -40,7 +40,7 @@ public class User implements java.io.Serializable {
   @ApiModelProperty(notes = "Nombre del usuario")
   private String name;
 
-  @Column(name = "password", length = 50)
+  @Column(name = "password", length = 255)
   @ApiModelProperty(notes = "Password del usuario")
   private String password;
 

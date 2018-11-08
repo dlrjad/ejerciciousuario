@@ -17,6 +17,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.RequestEntity;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -50,9 +51,16 @@ public class UserController {
   @Qualifier("userRepository")
   UserRepository userRepository;
 
+  private BCryptPasswordEncoder bCryptPasswordEncoder;
+
   @Autowired
   public UserController(UserRepository userRepository) {
     this.userRepository = userRepository;
+  }
+
+  public UserController(UserRepository userRepository, BCryptPasswordEncoder bCryptPasswordEncoder) {
+    this.userRepository = userRepository;
+    this.bCryptPasswordEncoder = bCryptPasswordEncoder;
   }
 
   /**
@@ -170,7 +178,7 @@ public class UserController {
       logger.debug("Ejecutando peticion HTTP POST");
       User newUser = new User(
         user.getName(),
-        user.getPassword(),
+        bCryptPasswordEncoder.encode(user.getPassword()),
         user.getMail()
       );
       //response.setStatus(201);
