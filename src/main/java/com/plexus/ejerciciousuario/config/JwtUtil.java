@@ -13,6 +13,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.authority.AuthorityUtils;
 
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
@@ -22,10 +23,10 @@ public class JwtUtil {
   private static Logger logger = LoggerFactory.getLogger(JwtUtil.class);
 
   // Método para crear el JWT y enviarlo al cliente en el header de la respuesta
-  static void addAuthentication(HttpServletResponse res, String username) {
+  static void addAuthentication(HttpServletResponse res, String email) {
 
     String token = Jwts.builder()
-    .setSubject(username)
+    .setSubject(email)
     
     // TOKEN_EXPIRATION_TIME = 10 days
     .setExpiration(new Date(System.currentTimeMillis() + TOKEN_EXPIRATION_TIME))
@@ -40,7 +41,7 @@ public class JwtUtil {
   }
 
   // Método para validar el token enviado por el cliente
-  static Authentication getAuthentication(HttpServletRequest request) {
+  static Authentication getAuthentication(HttpServletRequest request, String[] roles) {
 
     // Obtenemos el token que viene en el encabezado de la peticion
     String token = request.getHeader("Authorization");
@@ -56,9 +57,19 @@ public class JwtUtil {
       // Las peticiones que no sean /login no requieren una autenticacion por username/password 
       // por este motivo podemos devolver un UsernamePasswordAuthenticationToken sin password
       return user != null ?
-        new UsernamePasswordAuthenticationToken(user, null, emptyList()) :
+        new UsernamePasswordAuthenticationToken(user, null, AuthorityUtils.createAuthorityList(roles)) :
         null;
     }
     return null;
   }
+
+  static String getUser(HttpServletRequest request) {
+    String user = null;
+    String token = request.getHeader("Authorization");
+    if (token != null) {
+        user = Jwts.parser().setSigningKey(SUPER_SECRET_KEY).parseClaimsJws(token).getBody().getSubject();
+    }
+    return user;
+  }
+
 }

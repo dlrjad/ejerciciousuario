@@ -2,6 +2,8 @@ package com.plexus.ejerciciousuario.config;
 
 import static com.plexus.ejerciciousuario.config.Constants.LOGIN_URL;
 
+import com.plexus.ejerciciousuario.repository.UserRepository;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
@@ -22,6 +24,9 @@ public class SecurityConfig<UserService> extends WebSecurityConfigurerAdapter {
   @Qualifier("userService")
   private UserService userDetailsService;
 
+  @Autowired
+  private UserRepository userRepository;
+
   @Bean
 	public BCryptPasswordEncoder bCryptPasswordEncoder() {
 		return new BCryptPasswordEncoder();
@@ -37,14 +42,17 @@ public class SecurityConfig<UserService> extends WebSecurityConfigurerAdapter {
     httpSecurity
     .csrf().disable().authorizeRequests()
     .antMatchers(LOGIN_URL).permitAll() //permitimos el acceso a /login a cualquiera
+    .antMatchers("/api/users").access("hasRole('ROLE_USER') or hasRole('ROLE_ADMIN')")
     .anyRequest().authenticated()
+    //.antMatchers("/api/users").access("hasRole('ROLE_ADMIN')")
+    .and().httpBasic()
     .and()
     // Las peticiones /login pasaran previamente por este filtro
     .addFilterBefore(new LoginFilter(LOGIN_URL, authenticationManager()),
       UsernamePasswordAuthenticationFilter.class)
 
     // Las demás peticiones pasarán por este filtro para validar el token
-    .addFilterBefore(new JwtFilter(),
+    .addFilterBefore(new JwtFilter(userRepository),
       UsernamePasswordAuthenticationFilter.class);
   }
 
@@ -52,6 +60,7 @@ public class SecurityConfig<UserService> extends WebSecurityConfigurerAdapter {
   public void configure(AuthenticationManagerBuilder auth) throws Exception {
     // Se define la clase que recupera los usuarios y el algoritmo para procesar las passwords
     auth.userDetailsService((UserDetailsService) userDetailsService).passwordEncoder(bCryptPasswordEncoder());
+    //auth.inMemoryAuthentication().withUser("juan31@mail.com").password("password").roles("USER");
   }
   
 }

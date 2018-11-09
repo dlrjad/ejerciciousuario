@@ -47,7 +47,7 @@ public class LoginFilter extends AbstractAuthenticationProcessingFilter {
     // contra el que definimos en la clase SecurityConfig
     return getAuthenticationManager().authenticate(
       new UsernamePasswordAuthenticationToken(
-        user.getName(),
+        user.getMail(),
         user.getPassword(),
         Collections.emptyList()
       )
