@@ -129,7 +129,7 @@ public class UserController {
     }
   }
 
-  @GetMapping("/user/{name}/{password}")
+  /*@GetMapping("/user/{name}/{password}")
   public ResponseEntity<?> getUserByNamePassword(@PathVariable String name, @PathVariable String password) {
     try {
       logger.debug("Ejecutando peticion HTTP GET indicando user y password");
@@ -147,7 +147,7 @@ public class UserController {
         return new ResponseEntity<ErrorRest>(new ErrorRest(e.getMessage()), HttpStatus.BAD_REQUEST);
       }
     }
-  }
+  }*/
 
   /**
    * Método POST para crear usuario

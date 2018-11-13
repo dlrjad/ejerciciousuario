@@ -1,13 +1,16 @@
 package com.plexus.ejerciciousuario.config;
 
-import static com.plexus.ejerciciousuario.config.Constants.LOGIN_URL;
+import static com.plexus.ejerciciousuario.constant.Constants.LOGIN_URL;
 
 import com.plexus.ejerciciousuario.repository.UserRepository;
+import com.plexus.ejerciciousuario.security.JwtFilter;
+import com.plexus.ejerciciousuario.security.LoginFilter;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
@@ -21,10 +24,11 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 public class SecurityConfig<UserService> extends WebSecurityConfigurerAdapter {
 
   @Autowired
-  @Qualifier("userService")
-  private UserService userDetailsService;
+  @Qualifier("userDetailsServiceImpl")
+  private UserDetailsService userDetailsService;
 
   @Autowired
+  @Qualifier("userRepository")
   private UserRepository userRepository;
 
   @Bean
@@ -32,34 +36,41 @@ public class SecurityConfig<UserService> extends WebSecurityConfigurerAdapter {
 		return new BCryptPasswordEncoder();
   }
   
+  /*
+  * 1. The CSRF filter is deactivated
+  * 2. It's indicate the login not require authentication
+  * 3. It's indicate that the rest of URLs are secured
+  */
   @Override
   protected void configure(HttpSecurity httpSecurity) throws Exception { 
-    /*
-     * 1. Se desactiva el filtro CSRF
-     * 2. Se indica que el login no requiere autenticación
-     * 3. Se indica que el resto de URLs esten securizadas
-     */
     httpSecurity
+    .cors().and()
     .csrf().disable().authorizeRequests()
-    .antMatchers(LOGIN_URL).permitAll() //permitimos el acceso a /login a cualquiera
-    .antMatchers("/api/users").access("hasRole('ROLE_USER') or hasRole('ROLE_ADMIN')")
+    .antMatchers(HttpMethod.POST, LOGIN_URL).permitAll()
+    .antMatchers(HttpMethod.GET, "/api/users").access("hasRole('ROLE_ADMIN') or hasRole('ROLE_USER')")
+    .antMatchers(HttpMethod.GET, "/api/roles").access("hasRole('ROLE_ADMIN') or hasRole('ROLE_USER')")
+    .antMatchers(HttpMethod.GET, "/api/privileges").access("hasRole('ROLE_ADMIN') or hasRole('ROLE_USER')")
+    .antMatchers(HttpMethod.POST, "/api/user").access("hasRole('ROLE_ADMIN')")
+    .antMatchers(HttpMethod.POST, "/api/role").access("hasRole('ROLE_ADMIN')")
+    .antMatchers(HttpMethod.POST, "/api/privilege").access("hasRole('ROLE_ADMIN')")
+    .antMatchers("/api/user/{id}").access("hasRole('ROLE_ADMIN')")
+    .antMatchers("/api/role/{id}").access("hasRole('ROLE_ADMIN')")
+    .antMatchers("/api/privilege/{id}").access("hasRole('ROLE_ADMIN')")
     .anyRequest().authenticated()
-    //.antMatchers("/api/users").access("hasRole('ROLE_ADMIN')")
-    .and().httpBasic()
+    //.and().httpBasic()
     .and()
-    // Las peticiones /login pasaran previamente por este filtro
+    // The request /login will go through this filter
     .addFilterBefore(new LoginFilter(LOGIN_URL, authenticationManager()),
       UsernamePasswordAuthenticationFilter.class)
-
-    // Las demás peticiones pasarán por este filtro para validar el token
+    // The other requests will go through this filter to validate the token
     .addFilterBefore(new JwtFilter(userRepository),
       UsernamePasswordAuthenticationFilter.class);
   }
 
+  // It's defined the class that recovery the users and the algorithm to process the passwords
   @Override
   public void configure(AuthenticationManagerBuilder auth) throws Exception {
-    // Se define la clase que recupera los usuarios y el algoritmo para procesar las passwords
-    auth.userDetailsService((UserDetailsService) userDetailsService).passwordEncoder(bCryptPasswordEncoder());
+    auth.userDetailsService(userDetailsService).passwordEncoder(bCryptPasswordEncoder());
     //auth.inMemoryAuthentication().withUser("juan31@mail.com").password("password").roles("USER");
   }
   
