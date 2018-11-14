@@ -33,7 +33,7 @@ public class JwtFilter extends GenericFilterBean {
 
       HttpServletRequest req = (HttpServletRequest) request;
 
-       HttpServletResponse res = (HttpServletResponse) response;
+      HttpServletResponse res = (HttpServletResponse) response;
 
       String user = JwtUtil.getUser((HttpServletRequest) request);
       User aux = userRepository.findByName(user);
@@ -42,15 +42,15 @@ public class JwtFilter extends GenericFilterBean {
 
       Authentication authentication = JwtUtil.getAuthentication((HttpServletRequest)request, roles);
       SecurityContextHolder.getContext().setAuthentication(authentication);
-      //filterChain.doFilter(request, response);
+      filterChain.doFilter(request, response);
 
-      if (allowRequestWithoutToken(req)) {
+      /*if (allowRequestWithoutToken(req)) {
 
         ((HttpServletResponse) response).setStatus(HttpServletResponse.SC_OK);
 
         filterChain.doFilter(request, response);
 
-    }
+      }*/
 
   }
 
@@ -61,5 +61,5 @@ public class JwtFilter extends GenericFilterBean {
     }
     return false;
   }
-  
+
 }

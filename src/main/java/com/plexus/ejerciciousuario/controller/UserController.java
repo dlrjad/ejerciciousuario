@@ -51,6 +51,7 @@ public class UserController {
   @Qualifier("userRepository")
   UserRepository userRepository;
 
+  @Autowired
   private BCryptPasswordEncoder bCryptPasswordEncoder;
 
   @Autowired
@@ -129,26 +130,6 @@ public class UserController {
     }
   }
 
-  /*@GetMapping("/user/{name}/{password}")
-  public ResponseEntity<?> getUserByNamePassword(@PathVariable String name, @PathVariable String password) {
-    try {
-      logger.debug("Ejecutando peticion HTTP GET indicando user y password");
-      User result = userRepository.findByNameAndPassword(name, password);
-      //logger.debug(result.getMail());
-      return new ResponseEntity<User>(result, HttpStatus.OK);
-    } catch(Exception e) {
-      if(e.getMessage() == null) {
-        //response.setStatus(404);
-        logger.debug("Exception NULL");
-        throw new UserNotFoundException();
-      } else {
-        //response.setStatus(400);
-        logger.debug("Exception BAD_REQUEST");
-        return new ResponseEntity<ErrorRest>(new ErrorRest(e.getMessage()), HttpStatus.BAD_REQUEST);
-      }
-    }
-  }*/
-
   /**
    * Método POST para crear usuario
    * @param user
@@ -176,6 +157,7 @@ public class UserController {
     }
     try {
       logger.debug("Ejecutando peticion HTTP POST");
+      System.out.println(user.getPassword());
       User newUser = new User(
         user.getName(),
         bCryptPasswordEncoder.encode(user.getPassword()),

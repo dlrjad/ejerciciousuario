@@ -5,6 +5,7 @@ import static com.plexus.ejerciciousuario.constant.Constants.TOKEN_EXPIRATION_TI
 import static com.plexus.ejerciciousuario.constant.Constants.HEADER_AUTHORIZACION_KEY;
 import static com.plexus.ejerciciousuario.constant.Constants.TOKEN_BEARER_PREFIX;
 
+import java.io.IOException;
 import java.util.Date;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -24,7 +25,7 @@ public class JwtUtil {
   private static Logger logger = LoggerFactory.getLogger(JwtUtil.class);
 
   // Method to create the JWT and send the client the response's header
-  static void addAuthentication(HttpServletResponse res, String name) {
+  static void addAuthentication(HttpServletResponse res, String name) throws IOException {
 
     String token = Jwts.builder()
     .setSubject(name)
@@ -34,8 +35,10 @@ public class JwtUtil {
 
     // Add header to the token
     res.addHeader(HEADER_AUTHORIZACION_KEY, token);
+    res.getWriter().write(String.format("%s %s",TOKEN_BEARER_PREFIX, token));
+    res.flushBuffer();
     logger.debug("TOKEN: "+ String.format("%s %s",TOKEN_BEARER_PREFIX, token));
-
+  
   }
 
   // Method to valid the token send by the client

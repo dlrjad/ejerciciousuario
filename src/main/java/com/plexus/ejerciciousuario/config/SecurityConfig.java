@@ -47,15 +47,10 @@ public class SecurityConfig<UserService> extends WebSecurityConfigurerAdapter {
     .cors().and()
     .csrf().disable().authorizeRequests()
     .antMatchers(HttpMethod.POST, LOGIN_URL).permitAll()
-    .antMatchers(HttpMethod.GET, "/api/users").access("hasRole('ROLE_ADMIN') or hasRole('ROLE_USER')")
-    .antMatchers(HttpMethod.GET, "/api/roles").access("hasRole('ROLE_ADMIN') or hasRole('ROLE_USER')")
-    .antMatchers(HttpMethod.GET, "/api/privileges").access("hasRole('ROLE_ADMIN') or hasRole('ROLE_USER')")
-    .antMatchers(HttpMethod.POST, "/api/user").access("hasRole('ROLE_ADMIN')")
-    .antMatchers(HttpMethod.POST, "/api/role").access("hasRole('ROLE_ADMIN')")
-    .antMatchers(HttpMethod.POST, "/api/privilege").access("hasRole('ROLE_ADMIN')")
-    .antMatchers("/api/user/{id}").access("hasRole('ROLE_ADMIN')")
-    .antMatchers("/api/role/{id}").access("hasRole('ROLE_ADMIN')")
-    .antMatchers("/api/privilege/{id}").access("hasRole('ROLE_ADMIN')")
+    .antMatchers(HttpMethod.GET, "/**").access("hasRole('ROLE_ADMIN') or hasRole('ROLE_USER')")
+    .antMatchers(HttpMethod.POST, "/**").access("hasRole('ROLE_ADMIN')")
+    .antMatchers(HttpMethod.PUT, "/**").access("hasRole('ROLE_ADMIN')")
+    .antMatchers(HttpMethod.DELETE, "/**").access("hasRole('ROLE_ADMIN')")
     .anyRequest().authenticated()
     //.and().httpBasic()
     .and()
@@ -70,8 +65,8 @@ public class SecurityConfig<UserService> extends WebSecurityConfigurerAdapter {
   // It's defined the class that recovery the users and the algorithm to process the passwords
   @Override
   public void configure(AuthenticationManagerBuilder auth) throws Exception {
-    auth.userDetailsService(userDetailsService).passwordEncoder(bCryptPasswordEncoder());
-    //auth.inMemoryAuthentication().withUser("juan31@mail.com").password("password").roles("USER");
+    //auth.userDetailsService(userDetailsService).passwordEncoder(bCryptPasswordEncoder());
+    auth.userDetailsService(userDetailsService);
   }
   
 }
