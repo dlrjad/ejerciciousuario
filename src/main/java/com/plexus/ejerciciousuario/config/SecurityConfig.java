@@ -37,9 +37,10 @@ public class SecurityConfig<UserService> extends WebSecurityConfigurerAdapter {
   }
   
   /*
-  * 1. The CSRF filter is deactivated
-  * 2. It's indicate the login not require authentication
-  * 3. It's indicate that the rest of URLs are secured
+  * 1. It's active the configuration CORS
+  * 2. The CSRF filter is deactivated
+  * 3. It's indicate the login not require authentication
+  * 4. It's indicate that the rest of URLs are secured
   */
   @Override
   protected void configure(HttpSecurity httpSecurity) throws Exception { 
@@ -65,8 +66,8 @@ public class SecurityConfig<UserService> extends WebSecurityConfigurerAdapter {
   // It's defined the class that recovery the users and the algorithm to process the passwords
   @Override
   public void configure(AuthenticationManagerBuilder auth) throws Exception {
-    //auth.userDetailsService(userDetailsService).passwordEncoder(bCryptPasswordEncoder());
-    auth.userDetailsService(userDetailsService);
+    auth.userDetailsService(userDetailsService).passwordEncoder(bCryptPasswordEncoder());
+    //auth.userDetailsService(userDetailsService);
   }
   
 }

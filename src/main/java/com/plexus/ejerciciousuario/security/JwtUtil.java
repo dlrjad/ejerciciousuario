@@ -25,17 +25,31 @@ public class JwtUtil {
   private static Logger logger = LoggerFactory.getLogger(JwtUtil.class);
 
   // Method to create the JWT and send the client the response's header
-  static void addAuthentication(HttpServletResponse res, String name) throws IOException {
+  static void addAuthentication(HttpServletResponse res, String mail, String name) throws IOException {
 
     String token = Jwts.builder()
-    .setSubject(name)
+    .setSubject(mail)
     .setExpiration(new Date(System.currentTimeMillis() + TOKEN_EXPIRATION_TIME))
     .signWith(SignatureAlgorithm.HS512, SUPER_SECRET_KEY)
     .compact();
 
     // Add header to the token
     res.addHeader(HEADER_AUTHORIZACION_KEY, token);
-    res.getWriter().write(String.format("%s %s",TOKEN_BEARER_PREFIX, token));
+
+    String clientOrigin = res.getHeader("origin");
+
+    res.addHeader("Access-Control-Allow-Origin", clientOrigin);
+    res.setHeader("Access-Control-Allow-Methods", "POST, GET,  DELETE, PUT");
+    res.setHeader("Access-Control-Allow-Credentials", "true");
+    res.setHeader("Access-Control-Max-Age", "3600");
+    res.setHeader("Access-Control-Allow-Headers", "Accept, Content-Type, Origin, Authorization, X-Auth-Token");
+
+    StringBuilder sb = new StringBuilder();
+    sb.append("{\"name\":\""+name+"\",");
+    sb.append("\"token\":\""+TOKEN_BEARER_PREFIX + " "+ token +"\"}");
+
+    //res.getWriter().write(String.format("%s %s",TOKEN_BEARER_PREFIX, token));
+    res.getWriter().write(String.format("%s", sb));
     res.flushBuffer();
     logger.debug("TOKEN: "+ String.format("%s %s",TOKEN_BEARER_PREFIX, token));
   

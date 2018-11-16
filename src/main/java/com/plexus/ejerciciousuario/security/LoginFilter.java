@@ -48,19 +48,10 @@ public class LoginFilter extends AbstractAuthenticationProcessingFilter {
   HttpServletRequest req,
   HttpServletResponse res, FilterChain chain,
   Authentication auth) throws IOException, ServletException {
-    
-    /*HttpServletRequest request = (HttpServletRequest) req;
-    HttpServletResponse response = (HttpServletResponse) res;
-    String clientOrigin = request.getHeader("origin");
-
-    response.addHeader("Access-Control-Allow-Origin", clientOrigin);
-    response.setHeader("Access-Control-Allow-Methods", "POST, GET,  DELETE, PUT");
-    response.setHeader("Access-Control-Allow-Credentials", "true");
-    response.setHeader("Access-Control-Max-Age", "3600");
-    response.setHeader("Access-Control-Allow-Headers", "Accept, Content-Type, Origin, Authorization, X-Auth-Token");*/
-    
+        
     // If the authentication was successful, we added the token to the answer
-    JwtUtil.addAuthentication(res, auth.getName());
+    //JwtUtil.addAuthentication(res, auth.getName());
+    JwtUtil.addAuthentication(res, ((User)auth.getPrincipal()).getMail(), auth.getName());
 
   }
 }
