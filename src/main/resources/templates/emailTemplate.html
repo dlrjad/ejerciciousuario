@@ -1,0 +1,29 @@
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org">
+  <head>
+    <style>
+      p {
+        font-size: 14px;
+      }
+      h1 span {
+        color: green;
+      }
+      p span {
+        color: blue;
+      }
+      .body {
+        background-color: azure;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="body">
+      <h1>Bienvenido a USER APP <span th:text="${message}"></span></h1>
+      <p>Podrás iniciar sesión con el siguiente password:<span th:text="${messageBody}"></span></p>
+      <p>* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *</p>
+      <div class="floor">
+        <p>Atte.</p>
+        <p>dlrjad</p>
+      </div>
+    </div>
+  </body>
+</html>

@@ -8,7 +8,9 @@ import javax.servlet.http.HttpServletResponse;
 import com.plexus.ejerciciousuario.exception.ErrorRest;
 import com.plexus.ejerciciousuario.exception.UserNotFoundException;
 import com.plexus.ejerciciousuario.model.User;
+import com.plexus.ejerciciousuario.repository.RoleRepository;
 import com.plexus.ejerciciousuario.repository.UserRepository;
+import com.plexus.ejerciciousuario.service.EmailService;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -52,11 +54,19 @@ public class UserController {
   UserRepository userRepository;
 
   @Autowired
+  @Qualifier("roleRepository")
+  RoleRepository roleRepository;
+
+  @Autowired
+  EmailService emailService;
+
+  @Autowired
   private BCryptPasswordEncoder bCryptPasswordEncoder;
 
   @Autowired
-  public UserController(UserRepository userRepository) {
+  public UserController(UserRepository userRepository, RoleRepository roleRepository) {
     this.userRepository = userRepository;
+    this.roleRepository = roleRepository;
   }
 
   public UserController(UserRepository userRepository, BCryptPasswordEncoder bCryptPasswordEncoder) {
@@ -255,6 +265,50 @@ public class UserController {
       }
       logger.debug("Exception BAD_REQUEST"); 
       return new ResponseEntity<ErrorRest>(new ErrorRest(e.getMessage()), HttpStatus.BAD_REQUEST);
+    }
+  }
+
+  /**
+   * Método POST para registrarr usuario
+   * @param user
+   * @param response
+   * @return retorna usuario registrado en caso de éxito
+   */
+  @ApiResponses(value = 
+    {
+      @ApiResponse(code = 200, message = "Éxito al crear usuario"),
+      @ApiResponse(code = 401, message = "Sin autorización para ver el recurso"),
+      @ApiResponse(code = 403, message = "Acceso prohibido al recurso"),
+      @ApiResponse(code = 404, message = "Resultado no encontrado")
+    }
+  )
+  @ApiImplicitParams({
+    @ApiImplicitParam(name = "user", value = "User object", required = true, dataType = "object", paramType = "query"),
+    @ApiImplicitParam(name = "response", value = "Http Response", required = true)
+  })
+  @ApiOperation(value = "Guardar un usuario", response = User.class)
+  @PostMapping("/register")
+  public ResponseEntity<?> registerUser(@RequestBody User user, HttpServletResponse response) {
+    if (user.equals(null)) {
+      logger.debug("Exception BAD_REQUEST");
+      return new ResponseEntity<ErrorRest>(new ErrorRest("Formato de peticion incorrecto. Debe enviar los datos del usuario a crear"), HttpStatus.BAD_REQUEST);
+    }
+    try {
+      logger.debug("Ejecutando peticion HTTP POST");
+      String password = emailService.sendMail(user.getName());
+      User newUser = new User(
+        user.getName(),
+        bCryptPasswordEncoder.encode(password),
+        user.getMail()
+      );
+      
+      //response.setStatus(201);
+      logger.debug("Creando usuario con HTTP POST");
+      return new ResponseEntity<User>(userRepository.save(newUser), HttpStatus.OK);
+    } catch(Exception e) {
+      //response.setStatus(400);
+      logger.debug("Exception METHOD_NOT_ALLOWED");
+      return new ResponseEntity<ErrorRest>(new ErrorRest(e.getMessage()), HttpStatus.METHOD_NOT_ALLOWED);
     }
   }
 

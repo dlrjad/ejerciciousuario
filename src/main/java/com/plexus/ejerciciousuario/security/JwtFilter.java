@@ -1,5 +1,7 @@
 package com.plexus.ejerciciousuario.security;
 
+import static com.plexus.ejerciciousuario.constant.Constants.REGISTER_URL;
+
 import java.io.IOException;
 import java.util.stream.Collectors;
 
@@ -30,10 +32,18 @@ public class JwtFilter extends GenericFilterBean {
     FilterChain filterChain)
     throws IOException, ServletException {
 
+      HttpServletRequest request_;
+      request_ = (HttpServletRequest)request;
+
+      String[] roles = null;
+
+      if(!request_.getRequestURI().equals(REGISTER_URL)) {
+
       String user = JwtUtil.getUser((HttpServletRequest) request);
       User aux = userRepository.findByMail(user);
-      String[] roles = aux.getRoles().stream().map(role -> role.getName()).collect(Collectors.toList())
+      roles = aux.getRoles().stream().map(role -> role.getName()).collect(Collectors.toList())
       .toArray(new String[aux.getRoles().size()]);
+      }
 
       Authentication authentication = JwtUtil.getAuthentication((HttpServletRequest)request, roles);
       SecurityContextHolder.getContext().setAuthentication(authentication);

@@ -1,6 +1,7 @@
 package com.plexus.ejerciciousuario.config;
 
 import static com.plexus.ejerciciousuario.constant.Constants.LOGIN_URL;
+import static com.plexus.ejerciciousuario.constant.Constants.REGISTER_URL;
 
 import com.plexus.ejerciciousuario.repository.UserRepository;
 import com.plexus.ejerciciousuario.security.JwtFilter;
@@ -47,7 +48,7 @@ public class SecurityConfig<UserService> extends WebSecurityConfigurerAdapter {
     httpSecurity
     .cors().and()
     .csrf().disable().authorizeRequests()
-    .antMatchers(HttpMethod.POST, LOGIN_URL).permitAll()
+    .antMatchers(HttpMethod.POST, REGISTER_URL).permitAll()
     .antMatchers(HttpMethod.GET, "/**").access("hasRole('ROLE_ADMIN') or hasRole('ROLE_USER')")
     .antMatchers(HttpMethod.POST, "/**").access("hasRole('ROLE_ADMIN')")
     .antMatchers(HttpMethod.PUT, "/**").access("hasRole('ROLE_ADMIN')")
@@ -58,6 +59,7 @@ public class SecurityConfig<UserService> extends WebSecurityConfigurerAdapter {
     // The request /login will go through this filter
     .addFilterBefore(new LoginFilter(LOGIN_URL, authenticationManager()),
       UsernamePasswordAuthenticationFilter.class)
+    
     // The other requests will go through this filter to validate the token
     .addFilterBefore(new JwtFilter(userRepository),
       UsernamePasswordAuthenticationFilter.class);

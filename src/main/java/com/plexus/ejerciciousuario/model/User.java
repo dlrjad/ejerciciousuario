@@ -74,6 +74,20 @@ public class User implements java.io.Serializable {
     this.password = password;
     this.mail = email;
   }
+
+  /**
+   * Constructor para inicializar los atributos name, email y roles
+   * @param name
+   * @param password
+   * @param email
+   * @param roles
+   */
+  public User(String name, String password, String email, Set<Role> roles) {
+    this.name = name;
+    this.password = password;
+    this.mail = email;
+    this.roles = roles;
+  }
   
   /**
    * Constructor para inicializar los atributos id, name, password, email y roles
