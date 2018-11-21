@@ -1,0 +1,27 @@
+body {
+  font-family: 'Courier New', Courier, monospace;
+}
+p {
+  font-size: 16px;
+}
+h1 span {
+  color: #343a40;
+}
+p span {
+  color: #343a40;
+  font-weight: bold;
+  font-size: 17px;
+}
+.message {
+  background-color: #17a2b8;
+}
+.message h1, .message p, .message span {
+   padding: 15px;
+}
+.floor {
+  background-color: #343a40;
+}
+.floor p {
+  color: #fff;
+  padding: 15px;
+}

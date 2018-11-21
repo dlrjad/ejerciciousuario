@@ -18,6 +18,6 @@ public class Constants {
 	// MAIL
 
 	public static final String ADDRESSE = "";
-	public static final String SUBJECT = "Registro de usuario";
+	public static final String SUBJECT = "Registro de usuario / User register";
 
 }

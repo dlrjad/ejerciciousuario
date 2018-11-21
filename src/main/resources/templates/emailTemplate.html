@@ -1,28 +1,52 @@
 <html xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org">
   <head>
-    <style>
-      p {
-        font-size: 14px;
-      }
-      h1 span {
-        color: green;
-      }
-      p span {
-        color: blue;
-      }
-      .body {
-        background-color: azure;
-      }
-    </style>
+      <!--<link rel="stylesheet" href="styles.css">-->
+      <style>
+        body {
+          font-family: 'Courier New', Courier, monospace;
+        }
+        p {
+          font-size: 16px;
+        }
+        h1 span {
+          color: #343a40;
+        }
+        p span {
+          color: #343a40;
+          font-weight: bold;
+          font-size: 17px;
+        }
+        .message {
+          background-color: #17a2b8;
+        }
+        .message h1, .message p, .message span {
+           padding: 15px;
+        }
+        .floor {
+          background-color: #343a40;
+        }
+        .floor p {
+          color: #fff;
+          padding: 15px;
+        }
+      </style>
   </head>
   <body>
-    <div class="body">
+    <div class="message">
       <h1>Bienvenido a USER APP <span th:text="${message}"></span></h1>
       <p>Podrás iniciar sesión con el siguiente password:<span th:text="${messageBody}"></span></p>
-      <p>* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *</p>
       <div class="floor">
-        <p>Atte.</p>
-        <p>dlrjad</p>
+        <p>Atte.<br>
+        Plexus</p>
+      </div>
+    </div>
+    <hr>
+    <div class="message">
+      <h1>Wellcome to USER APP <span th:text="${message}"></span></h1>
+      <p>You can login with the following password:<span th:text="${messageBody}"></span></p>
+      <div class="floor">
+        <p>Atte.<br>
+        Plexus</p>
       </div>
     </div>
   </body>

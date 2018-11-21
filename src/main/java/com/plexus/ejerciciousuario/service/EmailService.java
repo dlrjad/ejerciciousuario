@@ -44,7 +44,7 @@ public class EmailService {
 				return this.password;
 			} catch (Exception e) {
 				e.printStackTrace();
-				return "Error al enviar email";
+				return "Error al enviar email / Error to send email";
 			}
     }
 
