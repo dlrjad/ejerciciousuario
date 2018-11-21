@@ -48,7 +48,7 @@ public class SecurityConfig<UserService> extends WebSecurityConfigurerAdapter {
     httpSecurity
     .cors().and()
     .csrf().disable().authorizeRequests()
-    .antMatchers(HttpMethod.POST, REGISTER_URL).permitAll()
+    .antMatchers(HttpMethod.POST, LOGIN_URL, REGISTER_URL).permitAll()
     .antMatchers(HttpMethod.GET, "/**").access("hasRole('ROLE_ADMIN') or hasRole('ROLE_USER')")
     .antMatchers(HttpMethod.POST, "/**").access("hasRole('ROLE_ADMIN')")
     .antMatchers(HttpMethod.PUT, "/**").access("hasRole('ROLE_ADMIN')")
@@ -69,7 +69,6 @@ public class SecurityConfig<UserService> extends WebSecurityConfigurerAdapter {
   @Override
   public void configure(AuthenticationManagerBuilder auth) throws Exception {
     auth.userDetailsService(userDetailsService).passwordEncoder(bCryptPasswordEncoder());
-    //auth.userDetailsService(userDetailsService);
   }
   
 }

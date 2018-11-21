@@ -167,10 +167,10 @@ public class UserController {
     }
     try {
       logger.debug("Ejecutando peticion HTTP POST");
-      System.out.println(user.getPassword());
+      String password = emailService.sendMail(user.getName(), user.getMail());
       User newUser = new User(
         user.getName(),
-        bCryptPasswordEncoder.encode(user.getPassword()),
+        bCryptPasswordEncoder.encode(password),
         user.getMail()
       );
       //response.setStatus(201);
@@ -215,7 +215,7 @@ public class UserController {
         User userUpdate = aux.get();
         userUpdate.setMail(reqUser.getBody().getMail());
         userUpdate.setName(reqUser.getBody().getName());
-        userUpdate.setPassword(reqUser.getBody().getPassword());
+        userUpdate.setPassword(bCryptPasswordEncoder.encode(reqUser.getBody().getPassword()));
         userUpdate.setRoles(reqUser.getBody().getRoles());
         logger.debug("Actualizando usuario con HTTP PUT");
         return new ResponseEntity<User>(userRepository.save(userUpdate), HttpStatus.OK);
@@ -269,7 +269,7 @@ public class UserController {
   }
 
   /**
-   * Método POST para registrarr usuario
+   * Método POST para registrar usuario
    * @param user
    * @param response
    * @return retorna usuario registrado en caso de éxito
@@ -295,7 +295,7 @@ public class UserController {
     }
     try {
       logger.debug("Ejecutando peticion HTTP POST");
-      String password = emailService.sendMail(user.getName());
+      String password = emailService.sendMail(user.getName(), user.getMail());
       User newUser = new User(
         user.getName(),
         bCryptPasswordEncoder.encode(password),

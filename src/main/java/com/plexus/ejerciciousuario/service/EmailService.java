@@ -28,7 +28,7 @@ public class EmailService {
 		private int length = 10;
 		private String characterSet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
 
-    public String sendMail(String userName) {
+    public String sendMail(String userName, String userEmail) {
 			
 			this.password = randomString(this.length, this.characterSet);
 
@@ -36,6 +36,7 @@ public class EmailService {
 				MimeMessage mail = mailSender.createMimeMessage();
 
 				MimeMessageHelper helper = new MimeMessageHelper( mail );
+				//helper.setTo(userEmail);
 				helper.setTo(ADDRESSE);
 				helper.setSubject(SUBJECT);
 				helper.setText(buildMessage(userName, this.password), true);
