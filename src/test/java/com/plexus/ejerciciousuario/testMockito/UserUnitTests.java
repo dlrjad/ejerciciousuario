@@ -19,8 +19,8 @@ public class UserUnitTests {
 
   @Before
   public void setUp() {
-      /*userRepository = Mockito.mock(UserRepository.class);
-      userController = new UserController(userRepository);*/
+      userRepository = Mockito.mock(UserRepository.class);
+      userController = new UserController(userRepository, null);
   }
 
   @Test

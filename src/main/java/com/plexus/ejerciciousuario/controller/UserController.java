@@ -53,9 +53,9 @@ public class UserController {
   @Qualifier("userRepository")
   UserRepository userRepository;
 
-  @Autowired
+  /*@Autowired
   @Qualifier("roleRepository")
-  RoleRepository roleRepository;
+  RoleRepository roleRepository;*/
 
   @Autowired
   EmailService emailService;
@@ -63,11 +63,11 @@ public class UserController {
   @Autowired
   private BCryptPasswordEncoder bCryptPasswordEncoder;
 
-  @Autowired
+  /*@Autowired
   public UserController(UserRepository userRepository, RoleRepository roleRepository) {
     this.userRepository = userRepository;
     this.roleRepository = roleRepository;
-  }
+  }*/
 
   public UserController(UserRepository userRepository, BCryptPasswordEncoder bCryptPasswordEncoder) {
     this.userRepository = userRepository;
@@ -167,15 +167,20 @@ public class UserController {
     }
     try {
       logger.debug("Ejecutando peticion HTTP POST");
-      String password = emailService.sendMail(user.getName(), user.getMail());
-      User newUser = new User(
-        user.getName(),
-        bCryptPasswordEncoder.encode(password),
-        user.getMail()
-      );
-      //response.setStatus(201);
-      logger.debug("Creando usuario con HTTP POST");
-      return new ResponseEntity<User>(userRepository.save(newUser), HttpStatus.OK);
+      User checkUser = userRepository.findByMail(user.getMail());
+      if(checkUser == null) {
+        String password = emailService.sendMail(user.getName(), user.getMail());
+        User newUser = new User(
+          user.getName(),
+          bCryptPasswordEncoder.encode(password),
+          user.getMail()
+        );
+        //response.setStatus(201);
+        logger.debug("Creando usuario con HTTP POST");
+        return new ResponseEntity<User>(userRepository.save(newUser), HttpStatus.OK);
+      } else {
+        return new ResponseEntity<ErrorRest>(new ErrorRest("Email debe ser unico"), HttpStatus.METHOD_NOT_ALLOWED);
+      }
     } catch(Exception e) {
       //response.setStatus(400);
       logger.debug("Exception METHOD_NOT_ALLOWED");
@@ -295,16 +300,21 @@ public class UserController {
     }
     try {
       logger.debug("Ejecutando peticion HTTP POST");
-      String password = emailService.sendMail(user.getName(), user.getMail());
-      User newUser = new User(
-        user.getName(),
-        bCryptPasswordEncoder.encode(password),
-        user.getMail()
-      );
-      
-      //response.setStatus(201);
-      logger.debug("Creando usuario con HTTP POST");
-      return new ResponseEntity<User>(userRepository.save(newUser), HttpStatus.OK);
+      User checkUser = userRepository.findByMail(user.getMail());
+      if(checkUser == null) {
+        String password = emailService.sendMail(user.getName(), user.getMail());
+        User newUser = new User(
+          user.getName(),
+          bCryptPasswordEncoder.encode(password),
+          user.getMail()
+        );
+        
+        //response.setStatus(201);
+        logger.debug("Creando usuario con HTTP POST");
+        return new ResponseEntity<User>(userRepository.save(newUser), HttpStatus.OK);
+      } else {
+        return new ResponseEntity<ErrorRest>(new ErrorRest("Email debe ser unico"), HttpStatus.METHOD_NOT_ALLOWED);
+      }
     } catch(Exception e) {
       //response.setStatus(400);
       logger.debug("Exception METHOD_NOT_ALLOWED");

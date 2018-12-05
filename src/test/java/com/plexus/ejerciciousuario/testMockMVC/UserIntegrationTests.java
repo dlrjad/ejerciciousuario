@@ -50,26 +50,52 @@ public class UserIntegrationTests {
   
   @Test
 	public void testGetUser() throws Exception {
-    this.mockMvc.perform(get("/api/user/2"))
+    this.mockMvc.perform(get("/api/user/5"))
     .andExpect(status().isOk());
   }
 
   @Test
-	public void testPostUser() throws Exception {
-    User user = new User("Juan60test", "password", "juan60test@mail.com");
+	public void testNotGetUser() throws Exception {
+    this.mockMvc.perform(get("/api/user/2"))
+    .andExpect(status().isNotFound());
+  }
+
+  @Test
+	public void testNotPostUser() throws Exception {
+    User user = new User("Juan60test", "password", "juan50test@mail.com");
     this.mockMvc.perform(post("/api/user")    
     .content(util.asJsonString(user))
     .contentType(MediaType.APPLICATION_JSON)
     .accept(MediaType.APPLICATION_JSON))
     /*.andExpect(status().isCreated())*/
     /*.andExpect(header().string("location", "http://localhost:8090/api/user/"))*/
+    .andExpect(status().isMethodNotAllowed());
+  }
+
+  @Test
+	public void testNotRegisterUser() throws Exception {
+    User user = new User("Juan60test", "password", "juan50test@mail.com");
+    this.mockMvc.perform(post("/api/user")    
+    .content(util.asJsonString(user))
+    .contentType(MediaType.APPLICATION_JSON)
+    .accept(MediaType.APPLICATION_JSON))
+    .andExpect(status().isMethodNotAllowed());
+  }
+
+  @Test
+  public void testPostUser() throws Exception {
+    User user = new User("Juan60test", "password", "juan71test@mail.com");
+    this.mockMvc.perform(post("/api/user")    
+    .content(util.asJsonString(user))
+    .contentType(MediaType.APPLICATION_JSON)
+    .accept(MediaType.APPLICATION_JSON))
     .andExpect(status().isOk());
   }
   
   @Test
-	public void testDeleteUser() throws Exception {
-    this.mockMvc.perform(delete("/api/user/31"))
-    .andExpect(status().isOk());
+	public void testNotDeleteUser() throws Exception {
+    this.mockMvc.perform(delete("/api/user/2"))
+    .andExpect(status().isNotFound());
   }
 
 }

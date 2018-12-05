@@ -10,7 +10,7 @@ public class UserUnitTest {
     private User user = new User();
 
     @Test
-    public void itShouldSayHolaMundo() {
+    public void itShouldGetRoles() {
         Assert.assertEquals(null, user.getRoles());
     }
 
